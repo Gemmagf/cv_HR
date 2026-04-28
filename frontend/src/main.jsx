@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { HashRouter as BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import './i18n'   // inicialitza i18next abans de renderitzar
 import App from './App'
 import './index.css'
 
