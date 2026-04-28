@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  # Base de dades PostgreSQL amb pgvector
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: cvhunter_db
+    environment:
+      POSTGRES_USER: cvhunter
+      POSTGRES_PASSWORD: cvhunter
+      POSTGRES_DB: cvhunter
+    volumes:
+      - cvhunter_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cvhunter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis per a cua de tasques
+  redis:
+    image: redis:7-alpine
+    container_name: cvhunter_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Backend FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cvhunter_backend
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://cvhunter:cvhunter@db:5432/cvhunter
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend Vite React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cvhunter_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  cvhunter_db_data:
