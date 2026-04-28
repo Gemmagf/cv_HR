@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '../utils/api'
 import toast from 'react-hot-toast'
+import { UserCheck } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -24,6 +25,12 @@ export default function LoginPage() {
     }
   }
 
+  const handleConvidat = () => {
+    login('demo-token', { nom: 'Convidat', rol: 'visor' }, 1)
+    toast.success('Accedint com a convidat — mode demostració')
+    navigate('/dashboard')
+  }
+
   return (
     <div className="min-h-screen bg-primary-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -39,6 +46,21 @@ export default function LoginPage() {
             </div>
           </div>
           <p className="text-primary-200 text-sm">Sistema Intel·ligent de Gestió de Talent</p>
+        </div>
+
+        {/* Botó convidat — destacat a dalt */}
+        <button
+          onClick={handleConvidat}
+          className="w-full flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold py-3.5 px-4 rounded-xl mb-4 transition-colors shadow-lg"
+        >
+          <UserCheck size={20} />
+          Veure demo sense registre
+        </button>
+
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1 h-px bg-white/20" />
+          <span className="text-primary-300 text-xs">o accedeix amb el teu compte</span>
+          <div className="flex-1 h-px bg-white/20" />
         </div>
 
         {/* Formulari */}
