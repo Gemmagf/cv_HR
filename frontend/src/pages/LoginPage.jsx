@@ -38,7 +38,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-primary-800 flex items-center justify-center p-4">
       {/* Selector d'idioma — cantonada superior dreta */}
       <div className="absolute top-4 right-4">
-        <LanguageSwitcher dark />
+        <LanguageSwitcher dropUp={false} />
       </div>
 
       <div className="w-full max-w-md">
@@ -50,7 +50,6 @@ export default function LoginPage() {
             </div>
             <div className="text-left">
               <div className="text-white font-bold text-2xl">{t('login.title')}</div>
-              <div className="text-primary-300 text-sm">{t('login.subtitle')}</div>
             </div>
           </div>
           <p className="text-primary-200 text-sm">{t('login.tagline')}</p>

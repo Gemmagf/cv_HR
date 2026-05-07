@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../../i18n'
-import { Globe } from 'lucide-react'
+import { Globe, ChevronUp, ChevronDown } from 'lucide-react'
 
-export default function LanguageSwitcher({ dark = false }) {
+export default function LanguageSwitcher({ dark = false, dropUp = true }) {
   const { i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -22,36 +22,55 @@ export default function LanguageSwitcher({ dark = false }) {
     setOpen(false)
   }
 
-  const textColor = dark ? 'text-primary-200 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-  const menuBg    = 'bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden z-50'
+  const textColor = dark
+    ? 'text-primary-200 hover:text-white'
+    : 'text-gray-600 hover:text-gray-900'
+
+  const menuPos = dropUp
+    ? 'bottom-full mb-1 bg-primary-900 border-primary-700 text-primary-200'
+    : 'top-full mt-1 bg-white border-gray-200 text-gray-700'
+
+  const itemActive = dropUp
+    ? 'bg-accent-500/20 text-accent-400 font-semibold'
+    : 'bg-primary-50 text-primary-800 font-semibold'
+
+  const itemHover = dropUp
+    ? 'hover:bg-white/10 hover:text-white'
+    : 'hover:bg-gray-50'
+
+  const checkColor = dropUp ? 'text-accent-400' : 'text-primary-600'
+
+  const ChevronIcon = dropUp
+    ? (open ? ChevronUp : ChevronDown)
+    : (open ? ChevronUp : ChevronDown)
 
   return (
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1.5 text-sm font-medium transition-colors px-2 py-1.5 rounded-lg ${textColor}`}
-        title="Canviar idioma / Change language"
+        className={`flex items-center gap-2 text-sm font-medium transition-colors px-2 py-1.5 rounded-lg w-full ${textColor}`}
+        title="Canviar idioma"
       >
-        <Globe size={16} />
-        <span>{current.lang.flag}</span>
-        <span className="hidden sm:inline">{current.lang.name}</span>
+        <Globe size={15} />
+        <span>{current.lang.name}</span>
+        <ChevronIcon
+          size={13}
+          className={`ml-auto transition-transform duration-200 ${open && dropUp ? 'rotate-0' : open && !dropUp ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {open && (
-        <div className={`absolute right-0 mt-1 w-48 ${menuBg}`} style={{ bottom: 'auto', top: '100%' }}>
+        <div className={`absolute left-0 right-0 border rounded-xl overflow-hidden z-[200] shadow-2xl ${menuPos}`}>
           {LANGUAGES.map((l) => (
             <button
               key={l.lang.code}
               onClick={() => handleSelect(l.lang.code)}
-              className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-left transition-colors
-                ${l.lang.code === i18n.language
-                  ? 'bg-primary-50 text-primary-800 font-semibold'
-                  : 'text-gray-700 hover:bg-gray-50'}`}
+              className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left transition-colors
+                ${l.lang.code === i18n.language ? itemActive : itemHover}`}
             >
-              <span className="text-base">{l.lang.flag}</span>
               <span>{l.lang.name}</span>
               {l.lang.code === i18n.language && (
-                <span className="ml-auto text-primary-600 text-xs">✓</span>
+                <span className={`ml-auto text-xs ${checkColor}`}>✓</span>
               )}
             </button>
           ))}

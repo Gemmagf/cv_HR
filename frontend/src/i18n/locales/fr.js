@@ -5,7 +5,7 @@ export default {
     clients: 'Clients', uploadCv: 'Importer CV', logout: 'Se déconnecter',
   },
   login: {
-    title: 'CV Hunter', subtitle: 'Massiu Soft SL',
+    title: 'CV Hunter',
     tagline: 'Système Intelligent de Gestion des Talents',
     guestBtn: 'Voir la démo sans inscription',
     orWith: 'ou connectez-vous avec votre compte',

@@ -40,7 +40,6 @@ export default function Layout() {
           </div>
           <div>
             <div className="text-white font-bold text-lg leading-tight">CV Hunter</div>
-            <div className="text-accent-400 text-xs font-semibold tracking-wide">Massiu Soft SL</div>
           </div>
           <button className="ml-auto lg:hidden text-primary-200 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X size={20} />
