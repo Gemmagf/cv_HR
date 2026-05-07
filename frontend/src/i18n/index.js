@@ -11,9 +11,8 @@ import it from './locales/it'
 import pt from './locales/pt'
 import pl from './locales/pl'
 import ro from './locales/ro'
-import nl from './locales/nl'
 
-export const LANGUAGES = [ca, es, en, fr, de, it, pt, pl, ro, nl]
+export const LANGUAGES = [ca, es, en, fr, de, it, pt, pl, ro]
 
 const resources = Object.fromEntries(
   LANGUAGES.map((l) => [l.lang.code, { translation: l }])

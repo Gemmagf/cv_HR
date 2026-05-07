@@ -40,7 +40,7 @@ export default function Layout() {
           </div>
           <div>
             <div className="text-white font-bold text-lg leading-tight">CV Hunter</div>
-            <div className="text-primary-200 text-xs">Massiu Soft</div>
+            <div className="text-accent-400 text-xs font-semibold tracking-wide">Massiu Soft SL</div>
           </div>
           <button className="ml-auto lg:hidden text-primary-200 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X size={20} />
@@ -56,7 +56,9 @@ export default function Layout() {
               end={to === '/dashboard'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-sm font-medium transition-colors
-                ${isActive ? 'bg-white/15 text-white' : 'text-primary-200 hover:bg-white/10 hover:text-white'}`
+                ${isActive
+                  ? 'bg-accent-500/30 text-white border-l-2 border-accent-400'
+                  : 'text-primary-200 hover:bg-white/10 hover:text-white'}`
               }
               onClick={() => setSidebarOpen(false)}
             >
