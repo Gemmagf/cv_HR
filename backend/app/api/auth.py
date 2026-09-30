@@ -42,8 +42,13 @@ async def registre(data: RegistreRequest, db: AsyncSession = Depends(get_db)):
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="L'email ja està en ús")
 
-    # Crear tenant
-    slug = data.nom_empresa.lower().replace(" ", "-")[:50]
+    # Crear tenant amb slug únic (dues empreses poden tenir el mateix nom)
+    base_slug = "-".join(data.nom_empresa.lower().split())[:50] or "empresa"
+    slug = base_slug
+    n = 1
+    while (await db.execute(select(Tenant).where(Tenant.slug == slug))).scalar_one_or_none():
+        n += 1
+        slug = f"{base_slug[:45]}-{n}"
     tenant = Tenant(
         nom=data.nom_empresa,
         slug=slug,

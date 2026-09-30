@@ -143,3 +143,49 @@ export const mockMatchingResults = {
     { candidate_id: 3, nom: "Laia Solà", ultima_posicio: "Tècnica de Selecció", ultima_empresa: "Randstad", anys_exp_total: 4, ubicacio: "Girona", foto_url: null, puntuacio_global: 52.8, puntuacio_habilitats: 60.0, puntuacio_experiencia: 45.0, puntuacio_formacio: 65.0, puntuacio_idiomes: 55.0, puntuacio_ubicacio: 40.0, fortaleses_top3: ["Formació", "Habilitats tècniques", "Idiomes"], mancances: ["Experiència", "Ubicació"], resum_ia: "Perfil júnior amb bona base. Li manquen anys d'experiència per al rol." },
   ],
 }
+
+// ——— Mini-proves d'habilitats (Skill Checks) ———
+
+/** Candidat retornat en mode demo quan es puja un CV nou */
+export const mockNouCandidat = {
+  id: 99, nom: "Núria", cognom: "Vidal", email: "nuria.vidal@gmail.com",
+  telefon: "655 112 233", ubicacio: "Barcelona", linkedin: null, foto_url: null,
+  ultima_posicio: "Analista de People Analytics", ultima_empresa: "Grifols",
+  anys_exp_total: 5, anys_ultima_posicio: 2,
+  habilitats_tecniques: ["Excel Avançat", "SQL", "Power BI", "Python", "SuccessFactors"],
+  habilitats_soft: ["Pensament analític", "Comunicació", "Autonomia"],
+  idiomes: [{ idioma: "Català", nivell: "Natiu" }, { idioma: "Castellà", nivell: "Natiu" }, { idioma: "Anglès", nivell: "B2" }],
+  disponibilitat: "actiu", teletreball: true, mobilitat: false,
+  pretensions_sal: "38.000–44.000 €",
+  resum_ia: "Analista de People Analytics amb 5 anys d'experiència construint quadres de comandament de RRHH (rotació, absentisme, compensació) amb SQL i Power BI. Perfil híbrid entre dades i persones.",
+  creat_el: new Date().toISOString(),
+  formacions: [{ titol: "Grau en Estadística", centre: "UB", any: 2019, tipus: "universitaria" }],
+  experiencies: [
+    { empresa: "Grifols", posicio: "Analista de People Analytics", inici: "2023-02-01", fi: null, descripcio: "Dashboards de RRHH per a 8.000 empleats." },
+  ],
+}
+
+/** Resultats de proves ja realitzats (per candidat) */
+export const mockResultatsProves = {
+  1: [
+    { test_id: "excel-avancat", skill: "Excel", score: 100, passed: true, level: "expert", data: "2026-04-12T10:15:00", assignment_id: 1 },
+    { test_id: "linkedin-recruiter", skill: "LinkedIn Recruiter", score: 80, passed: true, level: "avancat", data: "2026-04-12T10:40:00", assignment_id: 1 },
+  ],
+  2: [
+    { test_id: "power-bi", skill: "Power BI", score: 80, passed: true, level: "avancat", data: "2026-04-08T17:05:00", assignment_id: 2 },
+    { test_id: "sap-hcm", skill: "SAP HCM", score: 40, passed: false, level: "no_superat", data: "2026-04-08T17:30:00", assignment_id: 2 },
+  ],
+  4: [
+    { test_id: "sap-hcm", skill: "SAP HCM", score: 100, passed: true, level: "expert", data: "2026-02-15T09:00:00", assignment_id: 4 },
+    { test_id: "workday", skill: "Workday", score: 80, passed: true, level: "avancat", data: "2026-02-15T09:20:00", assignment_id: 4 },
+    { test_id: "angles-b2", skill: "Anglès", score: 100, passed: true, level: "expert", data: "2026-02-15T09:45:00", assignment_id: 4 },
+  ],
+}
+
+/** Proves tècniques associades a cada encàrrec */
+export const mockProvesEncarrec = {
+  1: ["linkedin-recruiter", "sap-hcm", "excel-avancat"],
+  2: ["power-bi", "angles-b2"],
+  3: ["compres-negociacio", "angles-b2"],
+  4: ["workday", "angles-b2"],
+}

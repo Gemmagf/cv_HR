@@ -10,9 +10,11 @@ from sqlalchemy import select, and_
 from pydantic import BaseModel
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_rol
 from app.models.assignment import Assignment, AssignmentCandidate, EstatEncarrec, EstatCandidatEncarrec
-from app.models.user import User
+from app.models.candidate import Candidate
+from app.models.user import User, RolUsuari
+from app.services import skill_tests as st
 
 router = APIRouter()
 
@@ -41,11 +43,16 @@ class AssignmentCreate(BaseModel):
     pes_ubicacio: float = 0.10
     prioritat: int = 2
     data_limit: Optional[datetime] = None
+    proves_requerides: List[str] = []   # ids de mini-proves del catàleg
 
 
 class EstatCandidatUpdate(BaseModel):
     estat: EstatCandidatEncarrec
     notes: Optional[str] = None
+
+
+class ProvesUpdate(BaseModel):
+    proves_requerides: List[str]
 
 
 # --- Endpoints ---
@@ -54,7 +61,7 @@ class EstatCandidatUpdate(BaseModel):
 async def crear_encarrec(
     data: AssignmentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """Crea un nou encàrrec de selecció"""
     # Validar que els pesos sumin ~1.0
@@ -67,6 +74,9 @@ async def crear_encarrec(
             status_code=400,
             detail=f"Els pesos han de sumar 1.0 (actual: {total_pesos:.2f})"
         )
+    desconegudes = [t for t in data.proves_requerides if not st.get_test(t)]
+    if desconegudes:
+        raise HTTPException(status_code=400, detail=f"Proves desconegudes: {', '.join(desconegudes)}")
 
     encarrec = Assignment(
         tenant_id=current_user.tenant_id,
@@ -133,9 +143,9 @@ async def alertes_encarrecs(
     alertes = []
     for e in encarrecs_oberts:
         r = await db.execute(
-            select(AssignmentCandidate).where(AssignmentCandidate.assignment_id == e.id)
+            select(AssignmentCandidate.id).where(AssignmentCandidate.assignment_id == e.id).limit(1)
         )
-        if not r.scalar_one_or_none():
+        if r.first() is None:
             alertes.append({
                 "assignment_id": e.id,
                 "titol": e.titol,
@@ -162,13 +172,15 @@ async def detall_encarrec(
     if not encarrec:
         raise HTTPException(status_code=404, detail="Encàrrec no trobat")
 
-    # Candidats al pipeline
+    # Candidats al pipeline (amb nom i habilitats verificades per a les mini-proves)
     r_pipeline = await db.execute(
-        select(AssignmentCandidate).where(
-            AssignmentCandidate.assignment_id == assignment_id
-        ).order_by(AssignmentCandidate.puntuacio_global.desc())
+        select(AssignmentCandidate, Candidate.nom, Candidate.cognom, Candidate.habilitats_verificades)
+        .join(Candidate, Candidate.id == AssignmentCandidate.candidate_id)
+        .where(AssignmentCandidate.assignment_id == assignment_id)
+        .order_by(AssignmentCandidate.puntuacio_global.desc())
     )
-    pipeline = r_pipeline.scalars().all()
+    files_pipeline = r_pipeline.all()
+    proves_req = set(encarrec.proves_requerides or [])
 
     data = {k: v for k, v in vars(encarrec).items() if not k.startswith("_")}
     if data.get("creat_el"):
@@ -179,15 +191,45 @@ async def detall_encarrec(
     data["pipeline"] = [
         {
             "candidate_id": p.candidate_id,
+            "nom": f"{nom} {cognom or ''}".strip(),
             "estat": p.estat,
             "puntuacio_global": p.puntuacio_global,
             "fortaleses_top3": p.fortaleses_top3,
             "notes": p.notes,
             "proposat_el": p.proposat_el.isoformat() if p.proposat_el else None,
+            "proves_superades": sorted(
+                {v["test_id"] for v in st.verified_skills(verificades)} & proves_req
+            ),
         }
-        for p in pipeline
+        for p, nom, cognom, verificades in files_pipeline
     ]
     return data
+
+
+@router.patch("/{assignment_id}/proves")
+async def actualitzar_proves_encarrec(
+    assignment_id: int,
+    data: ProvesUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
+):
+    """Defineix quines mini-proves d'habilitats es demanen per a aquest encàrrec"""
+    result = await db.execute(
+        select(Assignment).where(
+            Assignment.id == assignment_id,
+            Assignment.tenant_id == current_user.tenant_id,
+        )
+    )
+    encarrec = result.scalar_one_or_none()
+    if not encarrec:
+        raise HTTPException(status_code=404, detail="Encàrrec no trobat")
+
+    desconegudes = [t for t in data.proves_requerides if not st.get_test(t)]
+    if desconegudes:
+        raise HTTPException(status_code=400, detail=f"Proves desconegudes: {', '.join(desconegudes)}")
+
+    encarrec.proves_requerides = list(dict.fromkeys(data.proves_requerides))
+    return {"proves_requerides": encarrec.proves_requerides}
 
 
 @router.patch("/{assignment_id}/estat")
@@ -195,7 +237,7 @@ async def actualitzar_estat_encarrec(
     assignment_id: int,
     estat: EstatEncarrec,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """Canvia l'estat d'un encàrrec"""
     result = await db.execute(
@@ -218,7 +260,7 @@ async def actualitzar_estat_candidat_pipeline(
     candidate_id: int,
     data: EstatCandidatUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """Actualitza l'estat d'un candidat dins el pipeline d'un encàrrec"""
     result = await db.execute(

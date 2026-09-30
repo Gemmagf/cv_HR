@@ -9,9 +9,9 @@ from sqlalchemy import select
 from pydantic import BaseModel
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_rol
 from app.models.client import Client
-from app.models.user import User
+from app.models.user import User, RolUsuari
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ class ClientCreate(BaseModel):
 async def crear_client(
     data: ClientCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     client = Client(tenant_id=current_user.tenant_id, **data.model_dump())
     db.add(client)

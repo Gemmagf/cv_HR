@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { analyticsApi, assignmentsApi } from '../utils/api'
 import { useAuthStore } from '../store/authStore'
-import { Users, Briefcase, CheckCircle, TrendingUp, Building2, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Users, Briefcase, CheckCircle, TrendingUp, Building2, AlertTriangle, ArrowRight, ClipboardCheck, BadgeCheck } from 'lucide-react'
 
 function KpiCard({ title, value, icon: Icon, color, subtitle }) {
   return (
@@ -53,13 +53,15 @@ export default function DashboardPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-8">
         <KpiCard title={t('dashboard.kpi.candidates')} value={kpis?.total_candidats}   icon={Users}        color="text-primary-700" subtitle={t('dashboard.kpi.candidatesSub')} />
         <KpiCard title={t('dashboard.kpi.open')}       value={kpis?.encarrecs_oberts}  icon={Briefcase}    color="text-orange-600" />
         <KpiCard title={t('dashboard.kpi.closed')}     value={kpis?.encarrecs_coberts} icon={CheckCircle}  color="text-green-600" />
         <KpiCard title={t('dashboard.kpi.hired')}      value={kpis?.candidats_contractats} icon={TrendingUp} color="text-accent-600" />
         <KpiCard title={t('dashboard.kpi.clients')}    value={kpis?.total_clients}     icon={Building2}    color="text-purple-700" />
-        <KpiCard title={t('dashboard.kpi.successRate')} value={kpis?.taxa_exit_pct != null ? `${kpis.taxa_exit_pct}%` : null} icon={TrendingUp} color="text-green-700" subtitle={`${kpis?.total_proposats || 0} proposats`} />
+        <KpiCard title={t('dashboard.kpi.successRate')} value={kpis?.taxa_exit_pct != null ? `${kpis.taxa_exit_pct}%` : null} icon={TrendingUp} color="text-green-700" subtitle={t('dashboard.kpi.proposed', { n: kpis?.total_proposats || 0 })} />
+        <KpiCard title={t('dashboard.kpi.testsDone')} value={kpis?.proves_completades} icon={ClipboardCheck} color="text-accent-600" />
+        <KpiCard title={t('dashboard.kpi.verified')}  value={kpis?.habilitats_verificades} icon={BadgeCheck} color="text-emerald-600" />
       </div>
 
       {/* Alertes */}
@@ -88,11 +90,12 @@ export default function DashboardPage() {
 
       {/* Accions ràpides */}
       <h2 className="text-lg font-semibold text-gray-800 mb-3">{t('dashboard.quickActions')}</h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           { to: '/candidats/upload', label: t('dashboard.actions.upload'),         desc: t('dashboard.actions.uploadSub'),          color: 'bg-primary-800' },
           { to: '/encarrecs',        label: t('dashboard.actions.newAssignment'),   desc: t('dashboard.actions.newAssignmentSub'),   color: 'bg-accent-500' },
           { to: '/candidats',        label: t('dashboard.actions.viewCandidates'),  desc: `${kpis?.total_candidats || 0}`,           color: 'bg-purple-700' },
+          { to: '/proves',           label: t('dashboard.actions.tests'),           desc: t('dashboard.actions.testsSub'),           color: 'bg-emerald-700' },
           { to: '/clients',          label: t('dashboard.actions.clients'),         desc: t('dashboard.actions.clientsSub'),         color: 'bg-green-700' },
         ].map(({ to, label, desc, color }) => (
           <Link key={to} to={to} className={`${color} rounded-xl p-5 text-white hover:opacity-90 transition-opacity`}>

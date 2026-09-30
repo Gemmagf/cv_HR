@@ -3,7 +3,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, Users, Briefcase, Building2,
-  Upload, LogOut, Menu, X, Bell
+  Upload, LogOut, Menu, X, Bell, ClipboardCheck
 } from 'lucide-react'
 import { useState } from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -20,6 +20,7 @@ export default function Layout() {
     { to: '/candidats',        icon: Users,           label: t('nav.candidates') },
     { to: '/encarrecs',        icon: Briefcase,       label: t('nav.assignments') },
     { to: '/clients',          icon: Building2,       label: t('nav.clients') },
+    { to: '/proves',           icon: ClipboardCheck,  label: t('nav.tests') },
     { to: '/candidats/upload', icon: Upload,          label: t('nav.uploadCv') },
   ]
 

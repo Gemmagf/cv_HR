@@ -1,79 +1,132 @@
 """
 Mòdul A — Servei de Parsing de CV amb Claude (Anthropic)
 Extreu i normalitza camps estructurats de qualsevol CV (PDF, Word, text pla)
+
+Notes d'implementació:
+  * Client asíncron (`AsyncAnthropic`): el parsing es fa dins d'endpoints async de FastAPI
+    i el client síncron bloquejava l'event loop durant tota la crida.
+  * Sortida estructurada (`output_config.format` amb JSON Schema): l'API garanteix JSON vàlid,
+    així no cal netejar blocs ```json ni fer fallback per errors de format.
+  * Prompt caching del system prompt (idèntic a cada crida) per abaratir càrregues massives.
+  * Fallback de seguretat activat (`fallbacks="default"`): si els classificadors declinen la
+    petició, l'API la reintenta amb un altre model dins la mateixa crida.
 """
 
 import hashlib
 import json
-import re
 from typing import Optional
+
 import anthropic
 
 from app.core.config import settings
 
-client_ai = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+client_ai = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY or None)
 
-PROMPT_EXTRACTOR = """Ets un sistema expert en análisi de CVs. Analitza el text del CV proporcionat i extreu la informació de forma estructurada.
-
-Retorna ÚNICAMENT un JSON vàlid amb aquesta estructura exacta (sense cap text addicional):
-
-{
-  "nom": "string",
-  "cognom": "string",
-  "email": "string o null",
-  "telefon": "string o null",
-  "ubicacio": "string o null",
-  "linkedin": "string o null",
-  "anys_exp_total": número (float),
-  "ultima_empresa": "string o null",
-  "ultima_posicio": "string o null",
-  "data_inici_ultima": "YYYY-MM-DD o null",
-  "data_fi_ultima": "YYYY-MM-DD o null (null = treballa aquí ara)",
-  "anys_ultima_posicio": número (float),
-  "experiencies": [
-    {
-      "empresa": "string",
-      "posicio": "string",
-      "inici": "YYYY-MM-DD o null",
-      "fi": "YYYY-MM-DD o null",
-      "descripcio": "string"
-    }
-  ],
-  "titulacio_max": "string o null",
-  "centre_estudis": "string o null",
-  "any_titulacio": número o null,
-  "formacions": [
-    {
-      "titol": "string",
-      "centre": "string",
-      "any": número o null,
-      "tipus": "universitaria|fp|curs|certificacio|altre"
-    }
-  ],
-  "habilitats_tecniques": ["string"],
-  "habilitats_soft": ["string"],
-  "sector": "string o null",
-  "area_funcional": "string o null",
-  "idiomes": [
-    {"idioma": "string", "nivell": "A1|A2|B1|B2|C1|C2|Natiu"}
-  ],
-  "idioma_principal": "string o null",
-  "nivell_angles": "A1|A2|B1|B2|C1|C2|Natiu|null",
-  "mobilitat": true/false,
-  "teletreball": true/false,
-  "pretensions_sal": "string o null",
-  "resum_ia": "resum professional en 3-4 línies destacant els punts clau del candidat"
-}
+PROMPT_EXTRACTOR = """Ets un sistema expert en anàlisi de CVs. Analitza el text del CV proporcionat i extreu la informació de forma estructurada seguint exactament l'esquema JSON indicat.
 
 INSTRUCCIONS:
-- anys_exp_total: calcula'l sumant totes les experiències professionals
-- anys_ultima_posicio: calcula'l des de data_inici_ultima fins avui (o data_fi_ultima)
+- anys_exp_total: calcula'l sumant totes les experiències professionals (sense solapaments)
+- anys_ultima_posicio: calcula'l des de data_inici_ultima fins avui (o fins data_fi_ultima)
 - Si no trobes una dada, posa null
-- habilitats_tecniques: eines, programes, tecnologies, metodologies
+- habilitats_tecniques: eines, programes, tecnologies, metodologies (una entrada per habilitat, sense nivells)
 - habilitats_soft: competències interpersonals detectades al text
 - Normalitza els nivells d'idioma a l'escala A1-C2 (Natiu si correspon)
-- El resum_ia ha de ser en català o castellà (el mateix idioma del CV)
+- El resum_ia ha de ser en català o castellà (el mateix idioma del CV), de 3-4 línies
 """
+
+_NULLABLE_STR = {"type": ["string", "null"]}
+_NULLABLE_NUM = {"type": ["number", "null"]}
+_NIVELL = {"type": "string", "enum": ["A1", "A2", "B1", "B2", "C1", "C2", "Natiu"]}
+
+CV_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "nom", "cognom", "email", "telefon", "ubicacio", "linkedin",
+        "anys_exp_total", "ultima_empresa", "ultima_posicio", "data_inici_ultima", "data_fi_ultima",
+        "anys_ultima_posicio", "experiencies", "titulacio_max", "centre_estudis", "any_titulacio",
+        "formacions", "habilitats_tecniques", "habilitats_soft", "sector", "area_funcional",
+        "idiomes", "idioma_principal", "nivell_angles", "mobilitat", "teletreball", "pretensions_sal", "resum_ia",
+    ],
+    "properties": {
+        "nom": {"type": "string"},
+        "cognom": _NULLABLE_STR,
+        "email": _NULLABLE_STR,
+        "telefon": _NULLABLE_STR,
+        "ubicacio": _NULLABLE_STR,
+        "linkedin": _NULLABLE_STR,
+        "anys_exp_total": {"type": "number"},
+        "ultima_empresa": _NULLABLE_STR,
+        "ultima_posicio": _NULLABLE_STR,
+        "data_inici_ultima": {**_NULLABLE_STR, "description": "YYYY-MM-DD o null"},
+        "data_fi_ultima": {**_NULLABLE_STR, "description": "YYYY-MM-DD o null (null = treballa aquí ara)"},
+        "anys_ultima_posicio": {"type": "number"},
+        "experiencies": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["empresa", "posicio", "inici", "fi", "descripcio"],
+                "properties": {
+                    "empresa": {"type": "string"},
+                    "posicio": {"type": "string"},
+                    "inici": _NULLABLE_STR,
+                    "fi": _NULLABLE_STR,
+                    "descripcio": {"type": "string"},
+                },
+            },
+        },
+        "titulacio_max": _NULLABLE_STR,
+        "centre_estudis": _NULLABLE_STR,
+        "any_titulacio": {"type": ["integer", "null"]},
+        "formacions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["titol", "centre", "any", "tipus"],
+                "properties": {
+                    "titol": {"type": "string"},
+                    "centre": {"type": "string"},
+                    "any": {"type": ["integer", "null"]},
+                    "tipus": {"type": "string", "enum": ["universitaria", "fp", "curs", "certificacio", "altre"]},
+                },
+            },
+        },
+        "habilitats_tecniques": {"type": "array", "items": {"type": "string"}},
+        "habilitats_soft": {"type": "array", "items": {"type": "string"}},
+        "sector": _NULLABLE_STR,
+        "area_funcional": _NULLABLE_STR,
+        "idiomes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["idioma", "nivell"],
+                "properties": {"idioma": {"type": "string"}, "nivell": _NIVELL},
+            },
+        },
+        "idioma_principal": _NULLABLE_STR,
+        "nivell_angles": {"type": ["string", "null"], "enum": ["A1", "A2", "B1", "B2", "C1", "C2", "Natiu", None]},
+        "mobilitat": {"type": "boolean"},
+        "teletreball": {"type": "boolean"},
+        "pretensions_sal": _NULLABLE_STR,
+        "resum_ia": {"type": "string"},
+    },
+}
+
+DADES_FALLBACK = {
+    "nom": "Candidat desconegut",
+    "cognom": None,
+    "email": None,
+    "anys_exp_total": 0,
+    "habilitats_tecniques": [],
+    "habilitats_soft": [],
+    "idiomes": [],
+    "formacions": [],
+    "experiencies": [],
+    "resum_ia": "No s'ha pogut processar el CV correctament.",
+}
 
 
 def compute_hash(text: str) -> str:
@@ -81,14 +134,20 @@ def compute_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+class CVParseError(RuntimeError):
+    """El model no ha pogut extreure el CV (p. ex. petició declinada)."""
+
+
 async def parse_cv_text(cv_text: str) -> dict:
     """
     Analitza el text d'un CV amb Claude i retorna les dades estructurades.
     Usa prompt caching per optimitzar costos en processaments massius.
     """
-    response = client_ai.messages.create(
+    response = await client_ai.beta.messages.create(
         model=settings.CLAUDE_MODEL,
-        max_tokens=2048,
+        max_tokens=8192,  # el JSON d'un CV ocupa ~1-3K tokens; marge ampli sense arribar al timeout
+        betas=["server-side-fallback-2026-07-01"],
+        fallbacks="default",
         system=[
             {
                 "type": "text",
@@ -102,31 +161,18 @@ async def parse_cv_text(cv_text: str) -> dict:
                 "content": f"CV a analitzar:\n\n{cv_text}",
             }
         ],
+        output_config={"format": {"type": "json_schema", "schema": CV_SCHEMA}},
     )
 
-    raw = response.content[0].text.strip()
+    if response.stop_reason == "refusal":
+        raise CVParseError("El model ha declinat processar aquest document")
 
-    # Netejar possibles blocs de codi markdown
-    if raw.startswith("```"):
-        raw = re.sub(r"^```(?:json)?\n?", "", raw)
-        raw = re.sub(r"\n?```$", "", raw)
-
+    raw = next((b.text for b in response.content if b.type == "text"), "")
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
-        # Fallback: retornar dades mínimes
-        data = {
-            "nom": "Candidat desconegut",
-            "cognom": None,
-            "email": None,
-            "anys_exp_total": 0,
-            "habilitats_tecniques": [],
-            "habilitats_soft": [],
-            "idiomes": [],
-            "formacions": [],
-            "experiencies": [],
-            "resum_ia": "No s'ha pogut processar el CV correctament.",
-        }
+        # Amb sortida estructurada no hauria de passar (p. ex. resposta tallada per max_tokens)
+        data = dict(DADES_FALLBACK)
 
     data["cv_text_raw"] = cv_text
     data["hash_cv"] = compute_hash(cv_text)

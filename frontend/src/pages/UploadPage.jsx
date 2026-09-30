@@ -1,8 +1,12 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
+import { useTranslation } from 'react-i18next'
 import { candidatesApi } from '../utils/api'
+import { recommendTestsForCandidate } from '../utils/skillsEngine'
+import SkillTestRecommendations from '../components/modules/SkillTestRecommendations'
 import toast from 'react-hot-toast'
-import { Upload, FileText, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, XCircle, Loader2, ArrowRight } from 'lucide-react'
 
 const ACCEPTED = {
   'application/pdf': ['.pdf'],
@@ -12,9 +16,11 @@ const ACCEPTED = {
 }
 
 export default function UploadPage() {
+  const { t } = useTranslation()
   const [fitxers, setFitxers] = useState([])
   const [processing, setProcessing] = useState(false)
   const [resultats, setResultats] = useState(null)
+  const [nouCandidat, setNouCandidat] = useState(null)   // candidat retornat pel parser (pujada única)
 
   const onDrop = useCallback((acceptedFiles) => {
     setFitxers((prev) => [...prev, ...acceptedFiles.slice(0, 50 - prev.length)])
@@ -35,34 +41,37 @@ export default function UploadPage() {
 
     setProcessing(true)
     setResultats(null)
+    setNouCandidat(null)
 
     try {
       if (fitxers.length === 1) {
         const { data } = await candidatesApi.upload(fitxers[0])
         setResultats({ processats: 1, duplicats: 0, errors: [] })
-        toast.success(`CV de ${data.nom} processat correctament`)
+        setNouCandidat(data)
+        toast.success(t('upload.processedOk', { name: data.nom }))
       } else {
         const { data } = await candidatesApi.uploadMassiu(fitxers)
         setResultats(data)
         toast.success(
-          `${data.processats} CV processats · ${data.duplicats} duplicats · ${data.errors?.length || 0} errors`
+          `${data.processats} ${t('upload.results.processed')} · ${data.duplicats} ${t('upload.results.duplicates')} · ${data.errors?.length || 0} ${t('upload.results.errors')}`
         )
       }
       setFitxers([])
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Error en processar els fitxers')
+      toast.error(err.response?.data?.detail || t('upload.error'))
     } finally {
       setProcessing(false)
     }
   }
 
+  // Proactiu: proves que el candidat acabat de pujar pot fer per acreditar el CV
+  const recomanacions = useMemo(() => recommendTestsForCandidate(nouCandidat), [nouCandidat])
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Pujar CV</h1>
-        <p className="text-gray-500 mt-1">
-          Puja CV en PDF, Word o text pla. La IA els analitza i extreu tota la informació automàticament.
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('upload.title')}</h1>
+        <p className="text-gray-500 mt-1">{t('upload.subtitle')}</p>
       </div>
 
       {/* Zona de drag & drop */}
@@ -76,23 +85,18 @@ export default function UploadPage() {
         <input {...getInputProps()} />
         <Upload size={40} className={`mx-auto mb-3 ${isDragActive ? 'text-primary-600' : 'text-gray-400'}`} />
         <p className="font-semibold text-gray-700">
-          {isDragActive ? 'Deixa anar els fitxers aquí' : 'Arrossega els CV aquí o clica per seleccionar'}
+          {isDragActive ? t('upload.dropping') : t('upload.dropzone')}
         </p>
-        <p className="text-sm text-gray-400 mt-1">PDF, Word, TXT · Fins a 50 fitxers · Màx. 10MB per fitxer</p>
+        <p className="text-sm text-gray-400 mt-1">{t('upload.hint')}</p>
       </div>
 
       {/* Llista de fitxers */}
       {fitxers.length > 0 && (
         <div className="card mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold text-gray-700">
-              {fitxers.length} fitxer{fitxers.length !== 1 ? 's' : ''} seleccionat{fitxers.length !== 1 ? 's' : ''}
-            </span>
-            <button
-              onClick={() => setFitxers([])}
-              className="text-sm text-gray-400 hover:text-red-500"
-            >
-              Netejar tot
+            <span className="font-semibold text-gray-700">{t('upload.selected', { n: fitxers.length })}</span>
+            <button onClick={() => setFitxers([])} className="text-sm text-gray-400 hover:text-red-500">
+              {t('upload.clearAll')}
             </button>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -100,13 +104,8 @@ export default function UploadPage() {
               <div key={i} className="flex items-center gap-3 text-sm">
                 <FileText size={16} className="text-primary-600 flex-shrink-0" />
                 <span className="flex-1 truncate text-gray-700">{f.name}</span>
-                <span className="text-gray-400 text-xs">
-                  {(f.size / 1024).toFixed(0)} KB
-                </span>
-                <button
-                  onClick={() => eliminarFitxer(i)}
-                  className="text-gray-300 hover:text-red-500"
-                >
+                <span className="text-gray-400 text-xs">{(f.size / 1024).toFixed(0)} KB</span>
+                <button onClick={() => eliminarFitxer(i)} className="text-gray-300 hover:text-red-500">
                   <XCircle size={16} />
                 </button>
               </div>
@@ -119,15 +118,9 @@ export default function UploadPage() {
             className="btn-primary w-full mt-4 disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {processing ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Processant amb IA...
-              </>
+              <><Loader2 size={16} className="animate-spin" /> {t('upload.processing')}</>
             ) : (
-              <>
-                <Upload size={16} />
-                Processar {fitxers.length} CV
-              </>
+              <><Upload size={16} /> {t('upload.processBtn', { n: fitxers.length })}</>
             )}
           </button>
         </div>
@@ -135,20 +128,20 @@ export default function UploadPage() {
 
       {/* Resultats */}
       {resultats && (
-        <div className="card">
-          <h3 className="font-semibold text-gray-800 mb-4">Resultat del processament</h3>
+        <div className="card mb-6">
+          <h3 className="font-semibold text-gray-800 mb-4">{t('upload.results.title')}</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-3xl font-black text-green-600">{resultats.processats}</div>
-              <div className="text-sm text-gray-500">processats</div>
+              <div className="text-sm text-gray-500">{t('upload.results.processed')}</div>
             </div>
             <div>
               <div className="text-3xl font-black text-yellow-500">{resultats.duplicats}</div>
-              <div className="text-sm text-gray-500">duplicats</div>
+              <div className="text-sm text-gray-500">{t('upload.results.duplicates')}</div>
             </div>
             <div>
               <div className="text-3xl font-black text-red-500">{resultats.errors?.length || 0}</div>
-              <div className="text-sm text-gray-500">errors</div>
+              <div className="text-sm text-gray-500">{t('upload.results.errors')}</div>
             </div>
           </div>
           {resultats.errors?.length > 0 && (
@@ -161,7 +154,47 @@ export default function UploadPage() {
               ))}
             </div>
           )}
+          {/* Càrrega massiva: enllaç a cada candidat processat (el backend real els retorna) */}
+          {resultats.candidats?.length > 0 && (
+            <ul className="mt-4 divide-y divide-gray-100">
+              {resultats.candidats.map((c) => (
+                <li key={c.id} className="py-2 flex items-center justify-between text-sm">
+                  <span className="text-gray-700">{c.nom}</span>
+                  <Link to={`/candidats/${c.id}`} className="text-primary-700 font-medium hover:underline flex items-center gap-1">
+                    {t('skills.recommended')} ({c.proves_recomanades?.length || 0}) <ArrowRight size={14} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
+      )}
+
+      {/* Proactiu: després de pujar un CV, proposem les mini-proves per acreditar-lo */}
+      {nouCandidat && (
+        <>
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <h2 className="font-semibold text-gray-800">{t('skills.upload.title')}</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{t('skills.upload.hint')}</p>
+            </div>
+            <Link to={`/candidats/${nouCandidat.id}`} className="btn-secondary text-sm py-1.5 px-3 flex items-center gap-1 flex-shrink-0">
+              {t('skills.upload.viewProfile')} <ArrowRight size={14} />
+            </Link>
+          </div>
+          {nouCandidat.habilitats_tecniques?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {nouCandidat.habilitats_tecniques.map((h) => <span key={h} className="badge badge-blue">{h}</span>)}
+            </div>
+          )}
+          <SkillTestRecommendations
+            recommendations={recomanacions}
+            candidateId={nouCandidat.id}
+            candidateName={nouCandidat.nom}
+            title={t('skills.recommended')}
+            hint={null}
+          />
+        </>
       )}
     </div>
   )

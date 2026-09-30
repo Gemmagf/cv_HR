@@ -11,6 +11,7 @@ from app.core.security import get_current_user
 from app.models.candidate import Candidate
 from app.models.assignment import Assignment, AssignmentCandidate, EstatEncarrec, EstatCandidatEncarrec
 from app.models.client import Client
+from app.models.skill_test import SkillTestAttempt, EstatProva
 from app.models.user import User
 
 router = APIRouter()
@@ -67,10 +68,28 @@ async def dashboard_kpis(
     r_proposats = await db.execute(
         select(func.count()).where(AssignmentCandidate.tenant_id == tid)
     )
-    total_proposats = r_proposats.scalar() or 1
-    taxa_exit = round((contractats / total_proposats) * 100, 1)
+    total_proposats = r_proposats.scalar() or 0
+    taxa_exit = round((contractats / total_proposats) * 100, 1) if total_proposats else 0.0
+
+    # Mini-proves d'habilitats
+    r_proves = await db.execute(
+        select(func.count()).where(
+            SkillTestAttempt.tenant_id == tid, SkillTestAttempt.estat == EstatProva.COMPLETAT
+        )
+    )
+    proves_completades = r_proves.scalar() or 0
+    r_verif = await db.execute(
+        select(func.count()).where(
+            SkillTestAttempt.tenant_id == tid,
+            SkillTestAttempt.estat == EstatProva.COMPLETAT,
+            SkillTestAttempt.passed == True,
+        )
+    )
+    habilitats_verificades = r_verif.scalar() or 0
 
     return {
+        "proves_completades": proves_completades,
+        "habilitats_verificades": habilitats_verificades,
         "total_candidats": total_candidats,
         "encarrecs_oberts": encarrecs_oberts,
         "encarrecs_coberts": encarrecs_coberts,

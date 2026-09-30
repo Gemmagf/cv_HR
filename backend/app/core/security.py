@@ -13,7 +13,7 @@ from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.models.user import User
+from app.models.user import User, RolUsuari
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -58,3 +58,22 @@ async def get_current_user(
     if user is None or not user.is_active:
         raise credentials_exception
     return user
+
+
+def require_rol(*rols: RolUsuari):
+    """
+    Dependència que exigeix un dels rols indicats.
+    El rol `visor` és només lectura: no pot crear, modificar ni eliminar.
+    """
+    permesos = {r.value if isinstance(r, RolUsuari) else str(r) for r in rols}
+
+    async def _check(current_user: User = Depends(get_current_user)) -> User:
+        rol = current_user.rol.value if isinstance(current_user.rol, RolUsuari) else str(current_user.rol)
+        if rol not in permesos:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tens permisos per a aquesta acció",
+            )
+        return current_user
+
+    return _check

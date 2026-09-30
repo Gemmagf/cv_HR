@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Briefcase, Clock, Star } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { MapPin, Clock, Star } from 'lucide-react'
 import ScoreBadge from '../ui/ScoreBadge'
 import ScoreBar from '../ui/ScoreBar'
+import VerifiedSkillBadges from './VerifiedSkillBadges'
+import { useSkillsStore } from '../../store/skillsStore'
+import { DEMO } from '../../utils/api'
 
 export default function CandidateCard({ candidat, showScore = false, onSelect, selected = false }) {
+  const { t } = useTranslation()
+  const cid = candidat.id ?? candidat.candidate_id
+  // En mode real el backend ja retorna habilitats_verificades; en demo les llegim del store local
+  const resultatsDemo = useSkillsStore((s) => s.resultats[cid])
+  const verificades = candidat.habilitats_verificades ?? (DEMO ? resultatsDemo : null) ?? []
   return (
     <div
       className={`card hover:shadow-md transition-shadow cursor-pointer relative
@@ -59,9 +68,10 @@ export default function CandidateCard({ candidat, showScore = false, onSelect, s
             )}
             {candidat.anys_exp_total != null && (
               <span className="flex items-center gap-1">
-                <Clock size={12} /> {candidat.anys_exp_total.toFixed(0)} anys exp.
+                <Clock size={12} /> {t('candidates.yrsExp', { n: candidat.anys_exp_total.toFixed(0) })}
               </span>
             )}
+            <VerifiedSkillBadges resultats={verificades} compact />
           </div>
 
           {/* Habilitats */}
@@ -79,10 +89,10 @@ export default function CandidateCard({ candidat, showScore = false, onSelect, s
           {/* Barres de scoring si s'han calculat */}
           {showScore && candidat.puntuacio_habilitats != null && (
             <div className="mt-3 space-y-1.5">
-              <ScoreBar score={candidat.puntuacio_habilitats}  label="Habilitats" />
-              <ScoreBar score={candidat.puntuacio_experiencia} label="Experiència" />
-              <ScoreBar score={candidat.puntuacio_formacio}    label="Formació" />
-              <ScoreBar score={candidat.puntuacio_idiomes}     label="Idiomes" />
+              <ScoreBar score={candidat.puntuacio_habilitats}  label={t('matching.dims.habilitats')} />
+              <ScoreBar score={candidat.puntuacio_experiencia} label={t('matching.dims.experiencia')} />
+              <ScoreBar score={candidat.puntuacio_formacio}    label={t('matching.dims.formacio')} />
+              <ScoreBar score={candidat.puntuacio_idiomes}     label={t('matching.dims.idiomes')} />
             </div>
           )}
 

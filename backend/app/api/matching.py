@@ -10,9 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_rol
 from app.models.assignment import Assignment, AssignmentCandidate
-from app.models.user import User
+from app.models.user import User, RolUsuari
 from app.services.matching_engine import match_candidates, ResultatMatching
 from app.services.pdf_exporter import generar_pdf_proposta
 
@@ -68,6 +68,8 @@ async def matching_encarrec(
                 "fortaleses_top3": c.fortaleses_top3,
                 "mancances": c.mancances,
                 "resum_ia": c.resum_ia,
+                "habilitats_verificades": c.habilitats_verificades,
+                "proves_superades": c.proves_superades,
             }
             for c in candidats
         ],
@@ -79,7 +81,7 @@ async def proposar_candidats(
     assignment_id: int,
     candidate_ids: List[int],
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """
     Afegeix els candidats seleccionats al pipeline de l'encàrrec.

@@ -23,10 +23,18 @@ class Settings(BaseSettings):
 
     # Anthropic (IA per parsing i matching)
     ANTHROPIC_API_KEY: str = ""
-    CLAUDE_MODEL: str = "claude-opus-4-5"
+    CLAUDE_MODEL: str = "claude-opus-5-5"
 
     # CORS
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+        "https://gemmagf.github.io",
+    ]
+
+    # URL pública del frontend (per generar els enllaços de les mini-proves)
+    PUBLIC_APP_URL: str = "http://localhost:5173"
 
     # Upload
     MAX_CV_FILE_SIZE_MB: int = 10

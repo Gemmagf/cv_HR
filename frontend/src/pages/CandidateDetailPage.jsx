@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { candidatesApi } from '../utils/api'
-import { MapPin, Mail, Phone, Linkedin, ArrowLeft, Briefcase, GraduationCap, Globe } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { candidatesApi, skillTestsApi } from '../utils/api'
+import { recommendTestsForCandidate } from '../utils/skillsEngine'
+import VerifiedSkillBadges from '../components/modules/VerifiedSkillBadges'
+import SkillTestRecommendations from '../components/modules/SkillTestRecommendations'
+import { MapPin, Mail, Phone, Linkedin, ArrowLeft, Briefcase, GraduationCap, Globe, BadgeCheck } from 'lucide-react'
 
 function Seccio({ titol, icon: Icon, children }) {
   return (
@@ -17,12 +21,20 @@ function Seccio({ titol, icon: Icon, children }) {
 
 export default function CandidateDetailPage() {
   const { id } = useParams()
+  const { t, i18n } = useTranslation()
   const [candidat, setCandidatData] = useState(null)
+  const [resultats, setResultats] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    candidatesApi.detall(id).then((r) => setCandidatData(r.data)).finally(() => setLoading(false))
+    setLoading(true)
+    Promise.all([candidatesApi.detall(id), skillTestsApi.resultatsCandidat(id)])
+      .then(([c, r]) => { setCandidatData(c.data); setResultats(r.data || []) })
+      .finally(() => setLoading(false))
   }, [id])
+
+  // Proactiu: proves que el candidat pot fer per acreditar el seu CV
+  const recomanacions = useMemo(() => recommendTestsForCandidate(candidat, resultats), [candidat, resultats])
 
   if (loading) {
     return (
@@ -32,12 +44,14 @@ export default function CandidateDetailPage() {
     )
   }
 
-  if (!candidat) return <div className="card text-center py-12 text-gray-500">Candidat no trobat</div>
+  if (!candidat) return <div className="card text-center py-12 text-gray-500">{t('candidateDetail.notFound')}</div>
+
+  const dateFmt = (d) => (d ? new Date(d).toLocaleDateString(i18n.language, { year: 'numeric', month: 'short' }) : '')
 
   return (
     <div className="max-w-3xl mx-auto">
       <Link to="/candidats" className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary-700 mb-6">
-        <ArrowLeft size={16} /> Tornar a candidats
+        <ArrowLeft size={16} /> {t('candidateDetail.back')}
       </Link>
 
       {/* Perfil principal */}
@@ -73,7 +87,7 @@ export default function CandidateDetailPage() {
             <div className="text-3xl font-black text-primary-800">
               {candidat.anys_exp_total?.toFixed(0) || '—'}
             </div>
-            <div className="text-xs text-gray-400">anys exp.</div>
+            <div className="text-xs text-gray-400">{t('candidateDetail.yrsExp')}</div>
           </div>
         </div>
 
@@ -84,34 +98,55 @@ export default function CandidateDetailPage() {
         )}
       </div>
 
+      {/* Habilitats verificades amb mini-proves */}
+      <Seccio titol={t('skills.verified')} icon={BadgeCheck}>
+        {resultats.some((r) => r.passed) ? (
+          <VerifiedSkillBadges resultats={resultats} />
+        ) : (
+          <p className="text-sm text-gray-400">{t('skills.noVerified')}</p>
+        )}
+      </Seccio>
+
+      {/* Proactiu: proves recomanades a partir del CV */}
+      <div className="mb-4">
+        <SkillTestRecommendations
+          recommendations={recomanacions}
+          candidateId={candidat.id}
+          candidateName={candidat.nom}
+        />
+      </div>
+
       {/* Habilitats */}
       {candidat.habilitats_tecniques?.length > 0 && (
-        <Seccio titol="Habilitats tècniques" icon={Briefcase}>
+        <Seccio titol={t('candidateDetail.skills')} icon={Briefcase}>
           <div className="flex flex-wrap gap-2">
             {candidat.habilitats_tecniques.map((h) => (
               <span key={h} className="badge badge-blue">{h}</span>
             ))}
           </div>
           {candidat.habilitats_soft?.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {candidat.habilitats_soft.map((h) => (
-                <span key={h} className="badge badge-green">{h}</span>
-              ))}
-            </div>
+            <>
+              <p className="text-xs text-gray-400 mt-4 mb-2">{t('candidateDetail.softSkills')}</p>
+              <div className="flex flex-wrap gap-2">
+                {candidat.habilitats_soft.map((h) => (
+                  <span key={h} className="badge badge-green">{h}</span>
+                ))}
+              </div>
+            </>
           )}
         </Seccio>
       )}
 
       {/* Experiència */}
       {candidat.experiencies?.length > 0 && (
-        <Seccio titol="Experiència professional" icon={Briefcase}>
+        <Seccio titol={t('candidateDetail.experience')} icon={Briefcase}>
           <div className="space-y-4">
             {candidat.experiencies.map((e, i) => (
               <div key={i} className="border-l-2 border-primary-200 pl-4">
                 <div className="font-semibold text-gray-800">{e.posicio}</div>
                 <div className="text-sm text-primary-600">{e.empresa}</div>
                 <div className="text-xs text-gray-400">
-                  {e.inici} — {e.fi || 'Actual'}
+                  {dateFmt(e.inici)} — {e.fi ? dateFmt(e.fi) : t('candidateDetail.current')}
                 </div>
                 {e.descripcio && <p className="text-sm text-gray-600 mt-1">{e.descripcio}</p>}
               </div>
@@ -122,7 +157,7 @@ export default function CandidateDetailPage() {
 
       {/* Formació */}
       {candidat.formacions?.length > 0 && (
-        <Seccio titol="Formació" icon={GraduationCap}>
+        <Seccio titol={t('candidateDetail.education')} icon={GraduationCap}>
           <div className="space-y-3">
             {candidat.formacions.map((f, i) => (
               <div key={i} className="flex items-start gap-3">
@@ -139,12 +174,12 @@ export default function CandidateDetailPage() {
 
       {/* Idiomes */}
       {candidat.idiomes?.length > 0 && (
-        <Seccio titol="Idiomes" icon={Globe}>
+        <Seccio titol={t('candidateDetail.languages')} icon={Globe}>
           <div className="flex flex-wrap gap-3">
-            {candidat.idiomes.map((id) => (
-              <div key={id.idioma} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                <span className="font-medium text-gray-700">{id.idioma}</span>
-                <span className="badge badge-blue">{id.nivell}</span>
+            {candidat.idiomes.map((idm) => (
+              <div key={idm.idioma} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                <span className="font-medium text-gray-700">{idm.idioma}</span>
+                <span className="badge badge-blue">{idm.nivell}</span>
               </div>
             ))}
           </div>

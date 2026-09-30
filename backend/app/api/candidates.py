@@ -4,17 +4,18 @@ API Candidats — Mòdul A: Captura, Estructuració i Gestió de Candidats
 
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
-from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select
 from pydantic import BaseModel
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_rol
 from app.core.config import settings
 from app.models.candidate import Candidate, EstatCandidatura
-from app.models.user import User
+from app.models.user import User, RolUsuari
+from app.services import skill_tests as st
 from app.services.cv_parser import (
+    CVParseError,
     parse_cv_text,
     extract_text_from_pdf,
     extract_text_from_docx,
@@ -41,6 +42,7 @@ class CandidateOut(BaseModel):
     disponibilitat: str
     resum_ia: Optional[str]
     foto_url: Optional[str]
+    habilitats_verificades: Optional[List[dict]] = []
     creat_el: str
 
     class Config:
@@ -65,7 +67,7 @@ class CandidateUpdate(BaseModel):
 async def upload_cv(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """Puja un CV (PDF o Word), l'analitza amb IA i el desa com a candidat"""
 
@@ -88,8 +90,11 @@ async def upload_cv(
     if not cv_text.strip():
         raise HTTPException(status_code=422, detail="No s'ha pogut extreure text del fitxer")
 
-    # Comprovar duplicats pel hash
-    data = await parse_cv_text(cv_text)
+    # Analitzar amb IA i comprovar duplicats pel hash
+    try:
+        data = await parse_cv_text(cv_text)
+    except CVParseError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     existing = await db.execute(
         select(Candidate).where(
             Candidate.tenant_id == current_user.tenant_id,
@@ -111,20 +116,32 @@ async def upload_cv(
     db.add(candidat)
     await db.flush()
 
-    return {"id": candidat.id, "nom": candidat.nom, "missatge": "CV processat correctament"}
+    # Proactiu: quines mini-proves pot fer el candidat per acreditar el seu CV
+    recomanacions = st.recommend_for_candidate(
+        candidat.habilitats_tecniques, candidat.idiomes, candidat.ultima_posicio
+    )
+    return {
+        "id": candidat.id,
+        "nom": f"{candidat.nom} {candidat.cognom or ''}".strip(),
+        "habilitats_tecniques": candidat.habilitats_tecniques or [],
+        "idiomes": candidat.idiomes or [],
+        "ultima_posicio": candidat.ultima_posicio,
+        "proves_recomanades": recomanacions,
+        "missatge": "CV processat correctament",
+    }
 
 
 @router.post("/upload-massiu", status_code=201)
 async def upload_massiu(
     files: List[UploadFile] = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """Puja múltiples CV de cop (fins a 50 alhora)"""
     if len(files) > 50:
         raise HTTPException(status_code=400, detail="Màxim 50 fitxers per càrrega massiva")
 
-    resultats = {"processats": 0, "duplicats": 0, "errors": []}
+    resultats = {"processats": 0, "duplicats": 0, "errors": [], "candidats": []}
 
     for f in files:
         try:
@@ -163,7 +180,16 @@ async def upload_massiu(
                 hash_cv=data.get("hash_cv"),
             )
             db.add(candidat)
+            await db.flush()
             resultats["processats"] += 1
+            resultats["candidats"].append({
+                "id": candidat.id,
+                "nom": f"{candidat.nom} {candidat.cognom or ''}".strip(),
+                "habilitats_tecniques": candidat.habilitats_tecniques or [],
+                "proves_recomanades": st.recommend_for_candidate(
+                    candidat.habilitats_tecniques, candidat.idiomes, candidat.ultima_posicio
+                ),
+            })
 
         except Exception as e:
             resultats["errors"].append({"fitxer": f.filename, "error": str(e)})
@@ -196,7 +222,7 @@ async def llista_candidats(
 
     return [
         CandidateOut(
-            **{k: v for k, v in vars(c).items() if not k.startswith("_")},
+            **{k: v for k, v in vars(c).items() if not k.startswith("_") and k != "creat_el"},
             creat_el=c.creat_el.isoformat() if c.creat_el else "",
         )
         for c in candidats
@@ -233,7 +259,7 @@ async def actualitzar_candidat(
     candidate_id: int,
     data: CandidateUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN, RolUsuari.RECLUTADOR)),
 ):
     """Actualitza les dades d'un candidat"""
     result = await db.execute(
@@ -256,7 +282,7 @@ async def actualitzar_candidat(
 async def eliminar_candidat(
     candidate_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_rol(RolUsuari.ADMIN)),
 ):
     """Desactiva (soft delete) un candidat"""
     result = await db.execute(

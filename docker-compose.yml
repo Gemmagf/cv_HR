@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # Base de dades PostgreSQL amb pgvector
   db:
@@ -65,7 +63,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0
+    command: npm run dev -- --host 0.0.0.0 --port 5173
 
 volumes:
   cvhunter_db_data:

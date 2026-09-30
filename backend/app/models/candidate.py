@@ -67,6 +67,7 @@ class Candidate(Base):
     # --- Habilitats ---
     habilitats_tecniques = Column(JSON, default=list)   # ["Python", "SQL", ...]
     habilitats_soft      = Column(JSON, default=list)   # detectades per IA
+    habilitats_verificades = Column(JSON, default=list) # [{test_id, skill, score, passed, level, data}] — Mòdul F
     sector               = Column(String(200), nullable=True)
     area_funcional       = Column(String(200), nullable=True)
 

@@ -4,3 +4,4 @@ from app.models.user import User
 from app.models.candidate import Candidate
 from app.models.client import Client
 from app.models.assignment import Assignment, AssignmentCandidate
+from app.models.skill_test import SkillTestAttempt

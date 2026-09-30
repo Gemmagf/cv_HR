@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   RadarChart as ReRadar, PolarGrid, PolarAngleAxis,
   Radar, ResponsiveContainer, Legend, Tooltip
@@ -10,8 +11,9 @@ const COLORS = ['#3949AB', '#00ACC1', '#43A047', '#FB8C00', '#E53935']
  * candidats: [{ nom, habilitats, experiencia, formacio, idiomes, ubicacio }]
  */
 export default function RadarChart({ candidats = [] }) {
-  const dimensions = ['Habilitats', 'Experiència', 'Formació', 'Idiomes', 'Ubicació']
+  const { t } = useTranslation()
   const keys = ['puntuacio_habilitats', 'puntuacio_experiencia', 'puntuacio_formacio', 'puntuacio_idiomes', 'puntuacio_ubicacio']
+  const dimensions = ['habilitats', 'experiencia', 'formacio', 'idiomes', 'ubicacio'].map((d) => t(`matching.dims.${d}`))
 
   const data = dimensions.map((dim, i) => {
     const entry = { dim }

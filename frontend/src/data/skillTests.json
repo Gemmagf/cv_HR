@@ -1,0 +1,529 @@
+{
+  "version": 1,
+  "pass_score": 60,
+  "levels": [
+    { "min": 100, "code": "expert" },
+    { "min": 80, "code": "avancat" },
+    { "min": 60, "code": "competent" },
+    { "min": 0, "code": "no_superat" }
+  ],
+  "tests": [
+    {
+      "id": "excel-avancat",
+      "skill": "Excel",
+      "aliases": ["excel avançat", "excel avanzado", "microsoft excel", "fulls de càlcul", "hojas de cálculo", "spreadsheets", "google sheets"],
+      "category": "dades",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["analista", "finances", "finanzas", "compres", "compras", "administració", "administración", "controller", "nòmines", "nóminas", "rrhh", "recursos humans"],
+      "title": { "ca": "Excel avançat", "en": "Advanced Excel", "es": "Excel avanzado" },
+      "description": {
+        "ca": "Fórmules de cerca, referències, taules dinàmiques i funcions condicionals.",
+        "en": "Lookup formulas, references, pivot tables and conditional functions.",
+        "es": "Fórmulas de búsqueda, referencias, tablas dinámicas y funciones condicionales."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Quina funció cerca un valor a la primera columna d'un rang i retorna el valor d'una altra columna de la mateixa fila?", "en": "Which function looks up a value in the first column of a range and returns a value from another column in the same row?" },
+          "options": { "ca": ["SUMA.SI", "BUSCARV / VLOOKUP", "CONCATENAR", "COMPTARA"], "en": ["SUMIF", "VLOOKUP", "CONCAT", "COUNTA"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Què indica la referència $A$1 dins una fórmula?", "en": "What does the reference $A$1 mean inside a formula?" },
+          "options": { "ca": ["Referència relativa", "Referència absoluta: no canvia en copiar la fórmula", "Nom d'un full", "Un error de sintaxi"], "en": ["Relative reference", "Absolute reference: it does not change when the formula is copied", "A sheet name", "A syntax error"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Quina eina resumeix grans volums de dades per categories arrossegant camps a files, columnes i valors?", "en": "Which tool summarises large data sets by category by dragging fields into rows, columns and values?" },
+          "options": { "ca": ["Format condicional", "Taula dinàmica", "Validació de dades", "Cercar i reemplaçar"], "en": ["Conditional formatting", "Pivot table", "Data validation", "Find and replace"] },
+          "answer": 1
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Amb =SI(B2>100;\"Alt\";\"Baix\"), què retorna la fórmula si B2 val exactament 100?", "en": "With =IF(B2>100,\"High\",\"Low\"), what does the formula return if B2 is exactly 100?" },
+          "options": { "ca": ["Alt", "Baix", "#VALOR!", "100"], "en": ["High", "Low", "#VALUE!", "100"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Quina funció compta les cel·les que compleixen diversos criteris alhora?", "en": "Which function counts cells that meet several criteria at once?" },
+          "options": { "ca": ["COMPTAR.SI.CONJUNT / COUNTIFS", "SUMA", "MITJANA", "LLARG"], "en": ["COUNTIFS", "SUM", "AVERAGE", "LEN"] },
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": "sql-intermedi",
+      "skill": "SQL",
+      "aliases": ["mysql", "postgresql", "postgres", "sql server", "t-sql", "pl/sql", "bases de dades", "bases de datos", "databases"],
+      "category": "dades",
+      "level": "intermedi",
+      "duration_min": 10,
+      "role_keywords": ["analista", "dades", "datos", "data", "bi", "backend", "desenvolupador", "desarrollador", "developer"],
+      "title": { "ca": "SQL intermedi", "en": "Intermediate SQL", "es": "SQL intermedio" },
+      "description": {
+        "ca": "Consultes amb JOIN, agregacions, filtres sobre grups i conceptes bàsics d'índexs.",
+        "en": "JOIN queries, aggregations, group filters and index basics.",
+        "es": "Consultas con JOIN, agregaciones, filtros sobre grupos y conceptos básicos de índices."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Quina clàusula filtra els grups un cop aplicat GROUP BY?", "en": "Which clause filters groups after GROUP BY has been applied?" },
+          "options": { "ca": ["WHERE", "HAVING", "ORDER BY", "LIMIT"], "en": ["WHERE", "HAVING", "ORDER BY", "LIMIT"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Quin tipus de JOIN retorna totes les files de la taula esquerra i només les coincidents de la dreta?", "en": "Which JOIN returns every row from the left table and only the matching rows from the right table?" },
+          "options": { "ca": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "CROSS JOIN"], "en": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "CROSS JOIN"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Què retorna SELECT COUNT(DISTINCT ciutat) FROM clients?", "en": "What does SELECT COUNT(DISTINCT city) FROM clients return?" },
+          "options": { "ca": ["El nombre total de files", "El nombre de ciutats diferents", "La primera ciutat alfabèticament", "Un error de sintaxi"], "en": ["The total number of rows", "The number of distinct cities", "The first city alphabetically", "A syntax error"] },
+          "answer": 1
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Quina instrucció elimina totes les files d'una taula però en manté l'estructura?", "en": "Which statement removes every row from a table but keeps its structure?" },
+          "options": { "ca": ["DROP TABLE", "TRUNCATE TABLE", "ALTER TABLE", "REMOVE TABLE"], "en": ["DROP TABLE", "TRUNCATE TABLE", "ALTER TABLE", "REMOVE TABLE"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Per a què serveix principalment un índex sobre una columna?", "en": "What is the main purpose of an index on a column?" },
+          "options": { "ca": ["Accelerar cerques i filtres sobre aquesta columna", "Xifrar les dades", "Impedir valors NULL", "Reduir la mida de la taula"], "en": ["Speed up searches and filters on that column", "Encrypt the data", "Prevent NULL values", "Reduce the table size"] },
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": "python-dades",
+      "skill": "Python",
+      "aliases": ["pandas", "numpy", "python 3", "anàlisi de dades", "análisis de datos", "data analysis"],
+      "category": "programacio",
+      "level": "intermedi",
+      "duration_min": 10,
+      "role_keywords": ["data", "dades", "datos", "analista", "científic", "científico", "scientist", "people analytics", "desenvolupador", "developer"],
+      "title": { "ca": "Python per a anàlisi de dades", "en": "Python for data analysis", "es": "Python para análisis de datos" },
+      "description": {
+        "ca": "Tipus bàsics, estructures de dades i manipulació de taules amb pandas.",
+        "en": "Basic types, data structures and table manipulation with pandas.",
+        "es": "Tipos básicos, estructuras de datos y manipulación de tablas con pandas."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Quina llibreria s'utilitza habitualment per treballar amb taules (DataFrames) en Python?", "en": "Which library is commonly used to work with tables (DataFrames) in Python?" },
+          "options": { "ca": ["requests", "pandas", "flask", "os"], "en": ["requests", "pandas", "flask", "os"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Què retorna len([1, 2, 3, 4])?", "en": "What does len([1, 2, 3, 4]) return?" },
+          "options": { "ca": ["3", "4", "10", "Un error"], "en": ["3", "4", "10", "An error"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Com s'obté la mitjana de la columna 'edat' d'un DataFrame df?", "en": "How do you get the mean of the 'age' column of a DataFrame df?" },
+          "options": { "ca": ["df['edat'].mean()", "mean(df)", "df.avg('edat')", "df.edat.total()"], "en": ["df['age'].mean()", "mean(df)", "df.avg('age')", "df.age.total()"] },
+          "answer": 0
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Quin tipus de dada és {'a': 1, 'b': 2}?", "en": "What data type is {'a': 1, 'b': 2}?" },
+          "options": { "ca": ["Llista", "Tupla", "Diccionari", "Conjunt"], "en": ["List", "Tuple", "Dictionary", "Set"] },
+          "answer": 2
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Què fa df.dropna()?", "en": "What does df.dropna() do?" },
+          "options": { "ca": ["Elimina files duplicades", "Elimina les files que contenen valors nuls", "Ordena el DataFrame", "Elimina totes les columnes"], "en": ["Removes duplicate rows", "Removes rows that contain null values", "Sorts the DataFrame", "Removes every column"] },
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "power-bi",
+      "skill": "Power BI",
+      "aliases": ["powerbi", "dax", "tableau", "business intelligence", "quadres de comandament", "cuadros de mando", "dashboards", "looker", "qlik"],
+      "category": "dades",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["analista", "bi", "controller", "people analytics", "hrbp", "business partner"],
+      "title": { "ca": "Power BI i quadres de comandament", "en": "Power BI and dashboards", "es": "Power BI y cuadros de mando" },
+      "description": {
+        "ca": "Modelatge, mesures DAX, Power Query i publicació d'informes.",
+        "en": "Modelling, DAX measures, Power Query and report publishing.",
+        "es": "Modelado, medidas DAX, Power Query y publicación de informes."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Quin llenguatge s'utilitza per crear mesures calculades a Power BI?", "en": "Which language is used to create calculated measures in Power BI?" },
+          "options": { "ca": ["SQL", "DAX", "Python", "JavaScript"], "en": ["SQL", "DAX", "Python", "JavaScript"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Per a què serveix Power Query?", "en": "What is Power Query used for?" },
+          "options": { "ca": ["Publicar informes", "Transformar i netejar dades abans de carregar-les al model", "Crear visuals", "Gestionar permisos d'usuaris"], "en": ["Publishing reports", "Transforming and cleaning data before loading it into the model", "Creating visuals", "Managing user permissions"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Una relació 'molts a un' entre una taula de fets i una dimensió permet...", "en": "A 'many-to-one' relationship between a fact table and a dimension allows..." },
+          "options": { "ca": ["Filtrar els fets des dels atributs de la dimensió", "Duplicar automàticament les dades", "Eliminar la necessitat de mesures", "Res: les relacions no afecten els visuals"], "en": ["Filtering facts by the dimension's attributes", "Automatically duplicating the data", "Removing the need for measures", "Nothing: relationships do not affect visuals"] },
+          "answer": 0
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Quina mesura DAX suma la columna Import de la taula Vendes?", "en": "Which DAX measure sums the Amount column of the Sales table?" },
+          "options": { "ca": ["SUM(Vendes[Import])", "TOTAL(Import)", "ADD(Vendes)", "COUNT(Vendes[Import])"], "en": ["SUM(Sales[Amount])", "TOTAL(Amount)", "ADD(Sales)", "COUNT(Sales[Amount])"] },
+          "answer": 0
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "On es comparteix un informe amb l'equip perquè el consultin en línia?", "en": "Where is a report shared with the team so they can view it online?" },
+          "options": { "ca": ["En un fitxer Excel adjunt", "A un espai de treball de Power BI Service", "En un document Word", "Al Bloc de notes"], "en": ["In an attached Excel file", "In a Power BI Service workspace", "In a Word document", "In Notepad"] },
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "sap-hcm",
+      "skill": "SAP HCM",
+      "aliases": ["sap hr", "sap successfactors", "successfactors", "sap", "hris", "hcm", "employee central"],
+      "category": "hr_tech",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["rrhh", "recursos humans", "recursos humanos", "nòmines", "nóminas", "administració de personal", "hrbp", "hris"],
+      "title": { "ca": "SAP HCM / SuccessFactors", "en": "SAP HCM / SuccessFactors", "es": "SAP HCM / SuccessFactors" },
+      "description": {
+        "ca": "Dades mestres, infotips, transaccions clau i mòduls de l'ecosistema SAP de persones.",
+        "en": "Master data, infotypes, key transactions and modules of the SAP people ecosystem.",
+        "es": "Datos maestros, infotipos, transacciones clave y módulos del ecosistema SAP de personas."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "A SAP HCM, què són els infotips (infotypes)?", "en": "In SAP HCM, what are infotypes?" },
+          "options": { "ca": ["Informes estàndard", "Registres de dades mestres d'empleat (p. ex. 0002 Dades personals)", "Rols d'autorització", "Codis de transacció"], "en": ["Standard reports", "Employee master data records (e.g. 0002 Personal Data)", "Authorisation roles", "Transaction codes"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Per a què serveix la transacció PA30?", "en": "What is transaction PA30 used for?" },
+          "options": { "ca": ["Executar la nòmina", "Mantenir dades mestres de personal", "Crear posicions", "Generar informes financers"], "en": ["Running payroll", "Maintaining personnel master data", "Creating positions", "Generating financial reports"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Quin mòdul gestiona l'estructura organitzativa (unitats, posicions, llocs)?", "en": "Which module manages the organisational structure (units, positions, jobs)?" },
+          "options": { "ca": ["OM (Organizational Management)", "PY (Payroll)", "TM (Time Management)", "FI (Financials)"], "en": ["OM (Organizational Management)", "PY (Payroll)", "TM (Time Management)", "FI (Financials)"] },
+          "answer": 0
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Què calcula el mòdul PY (Payroll)?", "en": "What does the PY (Payroll) module calculate?" },
+          "options": { "ca": ["Els dies de vacances", "La nòmina segons esquemes i regles de càlcul", "Els plans de formació", "Les candidatures rebudes"], "en": ["Holiday entitlement", "Payroll based on schemas and calculation rules", "Training plans", "Received applications"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "A SuccessFactors, què és Employee Central?", "en": "In SuccessFactors, what is Employee Central?" },
+          "options": { "ca": ["Un mòdul de nòmina local", "El nucli de dades d'empleat al núvol", "Una plataforma de formació (LMS)", "Una eina de sourcing de candidats"], "en": ["A local payroll module", "The cloud core of employee data", "A learning platform (LMS)", "A candidate sourcing tool"] },
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "workday",
+      "skill": "Workday",
+      "aliases": ["workday hcm"],
+      "category": "hr_tech",
+      "level": "basic",
+      "duration_min": 6,
+      "role_keywords": ["rrhh", "recursos humans", "recursos humanos", "hrbp", "director de recursos humans", "people", "hris"],
+      "title": { "ca": "Workday HCM", "en": "Workday HCM", "es": "Workday HCM" },
+      "description": {
+        "ca": "Conceptes clau: processos de negoci, organitzacions supervisores, informes i càrregues massives.",
+        "en": "Key concepts: business processes, supervisory organisations, reporting and bulk loads.",
+        "es": "Conceptos clave: procesos de negocio, organizaciones supervisoras, informes y cargas masivas."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Què és Workday principalment?", "en": "What is Workday, primarily?" },
+          "options": { "ca": ["Un ERP exclusivament financer", "Un HCM (i finances) al núvol", "Un CRM de vendes", "Un portal d'ofertes de feina"], "en": ["A purely financial ERP", "A cloud HCM (and finance) system", "A sales CRM", "A job board"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Què és un 'Business Process' a Workday?", "en": "What is a 'Business Process' in Workday?" },
+          "options": { "ca": ["Un informe estàndard", "Un flux configurable de passos i aprovacions (p. ex. Hire)", "Un rol de seguretat", "Una integració externa"], "en": ["A standard report", "A configurable flow of steps and approvals (e.g. Hire)", "A security role", "An external integration"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Què defineix la 'Supervisory Organization'?", "en": "What does the 'Supervisory Organization' define?" },
+          "options": { "ca": ["La jerarquia de qui reporta a qui", "El calendari laboral", "El càlcul de la nòmina", "El pressupost anual"], "en": ["The reporting hierarchy (who reports to whom)", "The working calendar", "Payroll calculation", "The annual budget"] },
+          "answer": 0
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Amb quina eina es creen informes personalitzats a Workday?", "en": "Which tool is used to build custom reports in Workday?" },
+          "options": { "ca": ["Report Writer", "Excel", "SQL directe", "Python"], "en": ["Report Writer", "Excel", "Direct SQL", "Python"] },
+          "answer": 0
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Quina eina s'utilitza per carregar dades de forma massiva?", "en": "Which tool is used for bulk data loads?" },
+          "options": { "ca": ["EIB (Enterprise Interface Builder)", "Un document Word", "El Bloc de notes", "Un canal de Slack"], "en": ["EIB (Enterprise Interface Builder)", "A Word document", "Notepad", "A Slack channel"] },
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": "linkedin-recruiter",
+      "skill": "LinkedIn Recruiter",
+      "aliases": ["linkedin", "sourcing", "boolean search", "cerca booleana", "headhunting", "infojobs", "reclutament", "reclutamiento", "recruiting"],
+      "category": "hr",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["selecció", "selección", "reclutador", "reclutadora", "recruiter", "talent", "sourcing", "recruiting", "rrhh"],
+      "title": { "ca": "Sourcing i LinkedIn Recruiter", "en": "Sourcing and LinkedIn Recruiter", "es": "Sourcing y LinkedIn Recruiter" },
+      "description": {
+        "ca": "Cerca booleana, gestió de projectes i pipelines, mètriques d'InMail i talent pools.",
+        "en": "Boolean search, project and pipeline management, InMail metrics and talent pools.",
+        "es": "Búsqueda booleana, gestión de proyectos y pipelines, métricas de InMail y talent pools."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Quin operador booleà exclou un terme d'una cerca?", "en": "Which boolean operator excludes a term from a search?" },
+          "options": { "ca": ["AND", "OR", "NOT", "NEAR"], "en": ["AND", "OR", "NOT", "NEAR"] },
+          "answer": 2
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "La cerca \"HR Business Partner\" AND (Barcelona OR Girona) retorna perfils que...", "en": "The search \"HR Business Partner\" AND (Barcelona OR Girona) returns profiles that..." },
+          "options": { "ca": ["Contenen la frase exacta i almenys una de les dues ubicacions", "Contenen qualsevol de les paraules", "Només són de Barcelona", "No contenen la frase"], "en": ["Contain the exact phrase and at least one of the two locations", "Contain any of the words", "Are only from Barcelona", "Do not contain the phrase"] },
+          "answer": 0
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "A LinkedIn Recruiter, per a què serveixen els 'Projects'?", "en": "In LinkedIn Recruiter, what are 'Projects' for?" },
+          "options": { "ca": ["Publicar ofertes patrocinades", "Organitzar candidats i pipelines per a cada posició", "Gestionar la facturació", "Fer cursos de formació"], "en": ["Publishing sponsored jobs", "Organising candidates and pipelines for each position", "Managing billing", "Taking training courses"] },
+          "answer": 1
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Quina mètrica indica millor l'eficàcia dels teus InMails?", "en": "Which metric best indicates the effectiveness of your InMails?" },
+          "options": { "ca": ["Taxa de resposta", "Nombre de connexions", "Nombre de 'm'agrada'", "Visites al teu perfil"], "en": ["Response rate", "Number of connections", "Number of likes", "Visits to your profile"] },
+          "answer": 0
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Què és un 'talent pool'?", "en": "What is a 'talent pool'?" },
+          "options": { "ca": ["Un grup de candidats potencials per a futures vacants", "Un test tècnic en línia", "Un pressupost de selecció", "Un tipus de contracte"], "en": ["A group of potential candidates for future vacancies", "An online technical test", "A recruiting budget", "A type of contract"] },
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": "angles-b2",
+      "skill": "Anglès",
+      "aliases": ["english", "inglés", "anglès b2", "anglès c1", "english b2", "english c1", "anglès professional"],
+      "category": "idiomes",
+      "level": "b2",
+      "duration_min": 8,
+      "role_keywords": ["international", "internacional", "export", "global"],
+      "title": { "ca": "Anglès professional (B2)", "en": "Professional English (B2)", "es": "Inglés profesional (B2)" },
+      "description": {
+        "ca": "Gramàtica i vocabulari d'entorn laboral a nivell B2. Les preguntes són en anglès.",
+        "en": "Workplace grammar and vocabulary at B2 level. Questions are in English.",
+        "es": "Gramática y vocabulario de entorno laboral a nivel B2. Las preguntas están en inglés."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Choose the correct option: \"If I ___ more time, I would finish the report today.\"", "en": "Choose the correct option: \"If I ___ more time, I would finish the report today.\"" },
+          "options": { "ca": ["have", "had", "will have", "having"], "en": ["have", "had", "will have", "having"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "\"The meeting has been ___ until next Monday.\"", "en": "\"The meeting has been ___ until next Monday.\"" },
+          "options": { "ca": ["put off", "put out", "put down", "put up"], "en": ["put off", "put out", "put down", "put up"] },
+          "answer": 0
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Which sentence is correct?", "en": "Which sentence is correct?" },
+          "options": { "ca": ["She has worked here since three years.", "She has been working here for three years.", "She works here since three years ago.", "She is working here since three years."], "en": ["She has worked here since three years.", "She has been working here for three years.", "She works here since three years ago.", "She is working here since three years."] },
+          "answer": 1
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "\"We need to ___ a decision before Friday.\"", "en": "\"We need to ___ a decision before Friday.\"" },
+          "options": { "ca": ["do", "make", "take on", "get"], "en": ["do", "make", "take on", "get"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "\"Despite ___ late, he finished the task on time.\"", "en": "\"Despite ___ late, he finished the task on time.\"" },
+          "options": { "ca": ["arrive", "arriving", "to arrive", "arrived"], "en": ["arrive", "arriving", "to arrive", "arrived"] },
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "nomines-laboral",
+      "skill": "Nòmines",
+      "aliases": ["nómina", "nóminas", "nòmines a3", "a3", "a3 nòmines", "payroll", "administració de personal", "administración de personal", "seguretat social", "seguridad social", "dret laboral", "derecho laboral", "laboral"],
+      "category": "hr",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["nòmines", "nóminas", "payroll", "administració de personal", "administración de personal", "laboral", "rrhh"],
+      "title": { "ca": "Nòmines i administració laboral", "en": "Payroll and labour administration (Spain)", "es": "Nóminas y administración laboral" },
+      "description": {
+        "ca": "Bases de cotització, IRPF, Sistema RED, pagues extraordinàries i quitança segons la normativa espanyola.",
+        "en": "Contribution bases, income tax withholding, Sistema RED, extra payments and final settlement under Spanish regulations.",
+        "es": "Bases de cotización, IRPF, Sistema RED, pagas extraordinarias y finiquito según la normativa española."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Sobre quina base es calculen les cotitzacions a la Seguretat Social?", "en": "On which base are Social Security contributions calculated?" },
+          "options": { "ca": ["El salari net", "La base de cotització (salari brut més prorrata de pagues extres, dins els topalls)", "La retenció d'IRPF", "Les dietes exemptes"], "en": ["Net salary", "The contribution base (gross salary plus prorated extra payments, within the caps)", "Income tax withholding", "Exempt allowances"] },
+          "answer": 1
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "Què és l'IRPF retingut a la nòmina?", "en": "What is the IRPF withheld on a payslip?" },
+          "options": { "ca": ["Una cotització social", "Un avançament a compte de l'impost sobre la renda", "Una prima d'assegurança", "Un complement salarial"], "en": ["A social contribution", "An advance payment of personal income tax", "An insurance premium", "A salary supplement"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Amb quin sistema es comuniquen altes i baixes d'afiliació a la TGSS?", "en": "Which system is used to report registrations and deregistrations to the TGSS?" },
+          "options": { "ca": ["Sistema RED", "Model 111", "Model 190", "Portal del SEPE"], "en": ["Sistema RED", "Form 111", "Form 190", "SEPE portal"] },
+          "answer": 0
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Les pagues extraordinàries (mínim dues a l'any)...", "en": "Extra payments (at least two per year)..." },
+          "options": { "ca": ["Es poden eliminar per decisió de l'empresa", "Es poden prorratejar mensualment si el conveni ho permet", "Només es poden pagar en espècie", "No cotitzen a la Seguretat Social"], "en": ["Can be removed by company decision", "Can be prorated monthly if the collective agreement allows it", "Can only be paid in kind", "Are exempt from Social Security"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Què inclou la quitança (finiquito)?", "en": "What does the final settlement (finiquito) include?" },
+          "options": { "ca": ["Només l'última mensualitat", "Salari pendent, part proporcional de pagues extres i vacances no gaudides", "Sempre una indemnització per acomiadament", "Només les vacances"], "en": ["Only the last monthly salary", "Outstanding salary, prorated extra payments and untaken holidays", "Always a dismissal indemnity", "Only holidays"] },
+          "answer": 1
+        }
+      ]
+    },
+    {
+      "id": "compres-negociacio",
+      "skill": "Negociació",
+      "aliases": ["compres", "compras", "procurement", "purchasing", "sap mm", "negociación", "negotiation", "gestió de proveïdors", "gestión de proveedores", "supply chain"],
+      "category": "negoci",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["compres", "compras", "procurement", "buyer", "purchasing", "supply", "proveïdors", "proveedores"],
+      "title": { "ca": "Compres i negociació", "en": "Procurement and negotiation", "es": "Compras y negociación" },
+      "description": {
+        "ca": "BATNA, comandes a SAP MM, Incoterms, cost total de propietat i sol·licituds de cotització.",
+        "en": "BATNA, SAP MM purchase orders, Incoterms, total cost of ownership and requests for quotation.",
+        "es": "BATNA, pedidos en SAP MM, Incoterms, coste total de propiedad y solicitudes de cotización."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Què significa BATNA en negociació?", "en": "What does BATNA mean in negotiation?" },
+          "options": { "ca": ["La millor alternativa a un acord negociat", "El preu base d'un contracte", "El termini de pagament", "El bonus per objectius"], "en": ["The best alternative to a negotiated agreement", "The base price of a contract", "The payment term", "The performance bonus"] },
+          "answer": 0
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "A SAP MM, què és una 'Purchase Order' (transacció ME21N)?", "en": "In SAP MM, what is a 'Purchase Order' (transaction ME21N)?" },
+          "options": { "ca": ["Una factura de client", "Una comanda de compra a un proveïdor", "Un recompte d'inventari", "Una nòmina"], "en": ["A customer invoice", "A purchase order to a supplier", "An inventory count", "A payslip"] },
+          "answer": 1
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Què defineixen els Incoterms?", "en": "What do Incoterms define?" },
+          "options": { "ca": ["Els impostos d'importació", "Les responsabilitats i costos del transport entre comprador i venedor", "Els salaris del sector logístic", "Els estàndards de qualitat del producte"], "en": ["Import taxes", "Transport responsibilities and costs between buyer and seller", "Logistics sector salaries", "Product quality standards"] },
+          "answer": 1
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Què inclou el TCO (Total Cost of Ownership)?", "en": "What does TCO (Total Cost of Ownership) include?" },
+          "options": { "ca": ["Només el preu de compra", "Preu més costos d'ús, manteniment i final de vida", "Només l'IVA", "El marge del proveïdor"], "en": ["Only the purchase price", "Price plus usage, maintenance and end-of-life costs", "Only VAT", "The supplier's margin"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Què és un RFQ?", "en": "What is an RFQ?" },
+          "options": { "ca": ["Una sol·licitud de cotització a proveïdors", "Un rebut de pagament", "Un contracte marc", "Una auditoria interna"], "en": ["A request for quotation sent to suppliers", "A payment receipt", "A framework contract", "An internal audit"] },
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": "seleccio-competencies",
+      "skill": "Selecció",
+      "aliases": ["selecció de personal", "selección", "selección de personal", "entrevista", "entrevista per competències", "entrevista por competencias", "assessment", "talent acquisition", "tècnica de selecció", "técnico de selección", "reclutament", "reclutamiento"],
+      "category": "hr",
+      "level": "intermedi",
+      "duration_min": 8,
+      "role_keywords": ["selecció", "selección", "reclutador", "reclutadora", "recruiter", "talent", "cap de selecció", "técnico de selección", "tècnica de selecció"],
+      "title": { "ca": "Selecció per competències", "en": "Competency-based recruitment", "es": "Selección por competencias" },
+      "description": {
+        "ca": "Mètode STAR, biaixos d'entrevista, mètriques de selecció i límits legals.",
+        "en": "STAR method, interview biases, recruitment metrics and legal boundaries.",
+        "es": "Método STAR, sesgos de entrevista, métricas de selección y límites legales."
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "text": { "ca": "Què significa el mètode STAR en una entrevista per competències?", "en": "What does the STAR method stand for in a competency-based interview?" },
+          "options": { "ca": ["Situació, Tasca, Acció, Resultat", "Salari, Temps, Aptitud, Rol", "Seguretat, Talent, Anàlisi, Reacció", "Selecció, Test, Avaluació, Referències"], "en": ["Situation, Task, Action, Result", "Salary, Time, Aptitude, Role", "Safety, Talent, Analysis, Reaction", "Selection, Test, Assessment, References"] },
+          "answer": 0
+        },
+        {
+          "id": "q2",
+          "text": { "ca": "En què consisteix el biaix d'efecte halo?", "en": "What is the halo effect bias?" },
+          "options": { "ca": ["Jutjar tot el candidat a partir d'un sol tret positiu", "Preferir sempre el darrer candidat entrevistat", "Comparar el candidat només amb el seu CV", "Valorar més els candidats interns"], "en": ["Judging the whole candidate from a single positive trait", "Always preferring the last candidate interviewed", "Comparing the candidate only with their CV", "Favouring internal candidates"] },
+          "answer": 0
+        },
+        {
+          "id": "q3",
+          "text": { "ca": "Què mesura el 'time to hire'?", "en": "What does 'time to hire' measure?" },
+          "options": { "ca": ["Els dies des que el candidat entra al procés fins que accepta l'oferta", "Les hores totals d'entrevista", "El cost total del procés", "La rotació del primer any"], "en": ["The days from the candidate entering the process until they accept the offer", "Total interview hours", "The total cost of the process", "First-year turnover"] },
+          "answer": 0
+        },
+        {
+          "id": "q4",
+          "text": { "ca": "Quina d'aquestes preguntes és discriminatòria i no s'ha de fer en una entrevista?", "en": "Which of these questions is discriminatory and should not be asked in an interview?" },
+          "options": { "ca": ["Quins projectes has liderat?", "Tens intenció de tenir fills properament?", "Quina experiència tens amb SAP?", "Per què vols canviar de feina?"], "en": ["Which projects have you led?", "Are you planning to have children soon?", "What experience do you have with SAP?", "Why do you want to change jobs?"] },
+          "answer": 1
+        },
+        {
+          "id": "q5",
+          "text": { "ca": "Què és un 'assessment center'?", "en": "What is an 'assessment centre'?" },
+          "options": { "ca": ["Un centre de revisió mèdica", "Una avaluació amb exercicis pràctics observats per diversos avaluadors", "Un test d'idiomes en línia", "Una borsa de treball pública"], "en": ["A medical check-up centre", "An evaluation with practical exercises observed by several assessors", "An online language test", "A public job board"] },
+          "answer": 1
+        }
+      ]
+    }
+  ]
+}

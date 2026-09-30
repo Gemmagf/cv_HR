@@ -53,6 +53,7 @@ class Assignment(Base):
     teletreball_ok        = Column(Boolean, default=True)
     salari_max            = Column(String(100), nullable=True)
     notes_addicionals     = Column(Text, nullable=True)
+    proves_requerides     = Column(JSON, default=list)   # ids de mini-proves (skill_tests.json) — Mòdul F
 
     # Pesos configurables per al matching (0.0 - 1.0, han de sumar 1.0)
     pes_habilitats  = Column(Float, default=0.40)

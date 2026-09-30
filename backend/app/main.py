@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api import candidates, assignments, matching, clients, auth, analytics
+from app.api import candidates, assignments, matching, clients, auth, analytics, skill_tests
 
 
 @asynccontextmanager
@@ -40,6 +40,7 @@ app.include_router(candidates.router,  prefix="/api/candidates",  tags=["Candida
 app.include_router(assignments.router, prefix="/api/assignments", tags=["Encàrrecs"])
 app.include_router(matching.router,    prefix="/api/matching",    tags=["Matching"])
 app.include_router(analytics.router,   prefix="/api/analytics",   tags=["Analítica"])
+app.include_router(skill_tests.router, prefix="/api/skill-tests", tags=["Mini-proves d'habilitats"])
 
 
 @app.get("/health")
