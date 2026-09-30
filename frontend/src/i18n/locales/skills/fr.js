@@ -49,7 +49,7 @@ export default {
       rules2: 'Une fois commencé, le chronomètre tourne. Vous pouvez modifier une réponse avant d\'envoyer.',
       start: 'Commencer le test', next: 'Suivant', prev: 'Précédent', submit: 'Envoyer les réponses', submitting: 'Correction...',
       question: 'Question {{i}} sur {{n}}', timeUp: 'Le temps est écoulé',
-      unanswered: '{{n}} question(s) sans réponse. Envoyer quand même ?',
+      unanswered: '{{n}} question(s) sans réponse. Cliquez à nouveau sur Envoyer pour confirmer.',
       resultPassed: 'Félicitations ! Vous avez réussi', resultFailed: 'Vous n\'avez pas réussi cette fois',
       score: '{{c}} sur {{t}} réponses correctes', level: 'Niveau',
       passedMsg: 'Votre compétence en {{skill}} est maintenant vérifiée sur votre profil. Les entreprises ne vous feront plus passer de test technique pour cette compétence.',

@@ -49,7 +49,7 @@ export default {
       rules2: 'Una volta iniziato, il tempo scorre. Puoi cambiare risposta prima di inviare.',
       start: 'Inizia il test', next: 'Avanti', prev: 'Indietro', submit: 'Invia risposte', submitting: 'Correzione...',
       question: 'Domanda {{i}} di {{n}}', timeUp: 'Tempo scaduto',
-      unanswered: '{{n}} domanda/e senza risposta. Inviare comunque?',
+      unanswered: '{{n}} domanda/e senza risposta. Clicca di nuovo Invia per confermare.',
       resultPassed: 'Congratulazioni! Hai superato il test', resultFailed: 'Non hai superato il test',
       score: '{{c}} di {{t}} risposte corrette', level: 'Livello',
       passedMsg: 'La tua competenza in {{skill}} è ora verificata nel tuo profilo. Le aziende non ti faranno più una prova tecnica su questa competenza.',

@@ -49,7 +49,7 @@ export default {
       rules2: 'Depois de começar, o tempo conta. Pode alterar respostas antes de enviar.',
       start: 'Começar o teste', next: 'Seguinte', prev: 'Anterior', submit: 'Enviar respostas', submitting: 'A corrigir...',
       question: 'Pergunta {{i}} de {{n}}', timeUp: 'O tempo acabou',
-      unanswered: '{{n}} pergunta(s) sem resposta. Enviar mesmo assim?',
+      unanswered: '{{n}} pergunta(s) sem resposta. Clique novamente em Enviar para confirmar.',
       resultPassed: 'Parabéns! Passou o teste', resultFailed: 'Não passou o teste desta vez',
       score: '{{c}} de {{t}} respostas corretas', level: 'Nível',
       passedMsg: 'A sua competência em {{skill}} fica verificada no seu perfil. As empresas já não lhe farão prova técnica desta competência.',

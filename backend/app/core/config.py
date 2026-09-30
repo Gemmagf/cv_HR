@@ -21,7 +21,16 @@ class Settings(BaseSettings):
     # Redis (cua de tasques)
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    # Anthropic (IA per parsing i matching)
+    # IA — proveïdor: "ollama" (models locals, per defecte) o "anthropic" (Claude via API)
+    LLM_PROVIDER: str = "ollama"
+
+    # Ollama (models locals): https://ollama.com — `ollama pull <model>`
+    OLLAMA_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "qwen2.5:7b"     # bon equilibri qualitat/velocitat; en portàtils sense GPU: qwen2.5:3b
+    OLLAMA_NUM_CTX: int = 8192           # finestra de context (un CV llarg ocupa 2-4K tokens)
+    OLLAMA_TIMEOUT: float = 300.0        # segons; en CPU un CV pot trigar 1-3 minuts
+
+    # Anthropic (només si LLM_PROVIDER=anthropic)
     ANTHROPIC_API_KEY: str = ""
     CLAUDE_MODEL: str = "claude-opus-5-5"
 

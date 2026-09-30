@@ -2,6 +2,8 @@
 
 Plataforma multi-tenant per a consultores de selecció: puja CVs, la IA els estructura,
 defineix encàrrecs de client i el motor de matching puntua i compara candidats.
+La IA funciona amb **models locals** (Ollama) per defecte: cap clau d'API, cap cost i els CVs no surten
+de la teva màquina. Opcionalment es pot canviar a Claude (Anthropic) amb una variable d'entorn.
 Inclou un mòdul de **mini-proves d'habilitats** perquè els candidats acreditin el que
 diuen al CV i les empreses s'estalviïn la prova tècnica.
 
@@ -20,11 +22,11 @@ cv_HR/
 │       ├── utils/skillsEngine.js   motor de recomanació i correcció de mini-proves
 │       ├── data/skillTests.json    catàleg de mini-proves (font única, copiada al backend)
 │       └── i18n/             locales/<lang>.js + locales/skills/<lang>.js
-└── backend/    FastAPI + SQLAlchemy async + PostgreSQL/pgvector + Anthropic SDK
+└── backend/    FastAPI + SQLAlchemy async + PostgreSQL/pgvector + LLM (Ollama local o Anthropic)
     └── app/
         ├── api/              routers: auth, clients, candidates, assignments, matching, analytics, skill_tests
         ├── models/           Tenant, User, Client, Candidate, Assignment, SkillTestAttempt
-        ├── services/         cv_parser (Claude), matching_engine, pdf_exporter, skill_tests
+        ├── services/         llm (proveïdor), cv_parser, matching_engine, pdf_exporter, skill_tests
         └── data/skill_tests.json
 ```
 
@@ -52,15 +54,27 @@ npm test           # vitest (motor de mini-proves)
 npm run build
 ```
 
-### Backend + base de dades (mode real)
+### Tot el sistema amb IA local (mode real)
 
 ```bash
-cp backend/.env.example backend/.env   # omple SECRET_KEY, ANTHROPIC_API_KEY, PUBLIC_APP_URL
-docker compose up --build              # db (pgvector) + redis + backend :8000 + frontend :5173
+cp backend/.env.example backend/.env   # omple SECRET_KEY; la resta ja apunta a Ollama
+docker compose up --build              # db + redis + ollama + backend :8000 + frontend :5173
 ```
 
-Per connectar el frontend al backend real, crea `frontend/.env` amb `VITE_DEMO=false` (i `VITE_API_URL` si
-el backend no és al mateix origen). Documentació interactiva de l'API a http://localhost:8000/docs.
+El servei `ollama-pull` descarrega el model la primera vegada (`qwen2.5:7b`, uns 4,7 GB) i acaba.
+El frontend de compose ja arrenca amb `VITE_DEMO=false`, així que puja un CV real i veuràs el model
+local convertir-lo en perfil. Comprova l'estat de la IA a http://localhost:8000/health
+(`llm.model_carregat` ha de ser `true`). Documentació de l'API a http://localhost:8000/docs.
+
+**Triar model.** Per defecte `qwen2.5:7b` (bon JSON, entén català i castellà). En un portàtil sense GPU
+és lent (1-3 min per CV); posa `OLLAMA_MODEL=qwen2.5:3b` al `.env` o `OLLAMA_MODEL=qwen2.5:3b docker compose up`.
+Qualsevol model d'Ollama que suporti sortida estructurada serveix (`llama3.2`, `mistral`, `gemma3`...).
+
+**Sense Docker.** Instal·la [Ollama](https://ollama.com), fes `ollama pull qwen2.5:7b`, arrenca el backend
+amb `uvicorn app.main:app --reload` (necessita PostgreSQL) i el frontend amb `VITE_DEMO=false npm run dev`.
+
+**Claude en lloc de models locals.** `LLM_PROVIDER=anthropic` i `ANTHROPIC_API_KEY` al `.env`. El codi de
+parsing és el mateix; només canvia el proveïdor a `backend/app/services/llm.py`.
 
 ### Tests del backend
 
@@ -70,7 +84,8 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-Els tests són unitaris (motor de matching i servei de mini-proves) i no necessiten PostgreSQL ni clau d'Anthropic.
+Els tests són unitaris (motor de matching, mini-proves i proveïdor Ollama simulat) i no necessiten
+PostgreSQL, Ollama ni cap clau d'API.
 
 ## Rols
 

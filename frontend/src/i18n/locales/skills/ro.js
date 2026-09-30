@@ -49,7 +49,7 @@ export default {
       rules2: 'Odată început, timpul curge. Poți schimba răspunsul înainte de trimitere.',
       start: 'Începe testul', next: 'Următorul', prev: 'Anterior', submit: 'Trimite răspunsurile', submitting: 'Se corectează...',
       question: 'Întrebarea {{i}} din {{n}}', timeUp: 'Timpul a expirat',
-      unanswered: '{{n}} întrebare(i) fără răspuns. Trimiți oricum?',
+      unanswered: '{{n}} întrebare(i) fără răspuns. Apasă din nou Trimite pentru a confirma.',
       resultPassed: 'Felicitări! Ai promovat testul', resultFailed: 'Nu ai promovat testul de această dată',
       score: '{{c}} din {{t}} răspunsuri corecte', level: 'Nivel',
       passedMsg: 'Competența ta în {{skill}} este acum verificată în profil. Companiile nu îți vor mai face probă tehnică pentru această competență.',

@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { BadgeCheck, Clock, ListChecks, Link2, ExternalLink, Sparkles, Send } from 'lucide-react'
 import { skillTestsApi } from '../../utils/api'
-import { pickText, encodeInviteToken, inviteUrl } from '../../utils/skillsEngine'
+import { pickText, encodeInviteToken } from '../../utils/skillsEngine'
 
 /**
  * Panell de proves recomanades.
@@ -26,6 +27,7 @@ export default function SkillTestRecommendations({
   showInviteAll = true,
 }) {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [busy, setBusy] = useState(null)
   const selectable = typeof onToggle === 'function'
 
@@ -71,7 +73,7 @@ export default function SkillTestRecommendations({
 
   const previsualitzar = (testId) => {
     const token = encodeInviteToken({ candidateId: null, testId, assignmentId, candidateName })
-    window.open(inviteUrl(token), '_blank', 'noopener')
+    navigate(`/prova/${token}`, { state: { preview: true } })
   }
 
   return (

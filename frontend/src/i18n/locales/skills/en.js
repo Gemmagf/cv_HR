@@ -49,7 +49,7 @@ export default {
       rules2: 'Once you start, the timer runs. You can change an answer before submitting.',
       start: 'Start the test', next: 'Next', prev: 'Previous', submit: 'Submit answers', submitting: 'Grading...',
       question: 'Question {{i}} of {{n}}', timeUp: 'Time is up',
-      unanswered: '{{n}} unanswered question(s). Submit anyway?',
+      unanswered: '{{n}} unanswered question(s). Click Submit again to confirm.',
       resultPassed: 'Congratulations! You passed', resultFailed: 'You did not pass this time',
       score: '{{c}} of {{t}} correct answers', level: 'Level',
       passedMsg: 'Your skill in {{skill}} is now verified on your profile. Companies will no longer give you a technical test for this skill.',

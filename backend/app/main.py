@@ -45,4 +45,14 @@ app.include_router(skill_tests.router, prefix="/api/skill-tests", tags=["Mini-pr
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "app": "CV Hunter", "version": "1.0.0"}
+    """Estat del servei i del proveïdor d'IA (útil per comprovar que Ollama té el model carregat)."""
+    from app.services import llm
+    info = {"status": "ok", "app": "CV Hunter", "version": "1.1.0", "llm": llm.describe()}
+    if llm.provider_name() == "ollama":
+        try:
+            models = await llm.ollama_models()
+            info["llm"]["models_disponibles"] = models
+            info["llm"]["model_carregat"] = any(m.split(":")[0] == llm.model_name().split(":")[0] for m in models)
+        except Exception as e:  # noqa: BLE001
+            info["llm"]["error"] = f"Ollama no accessible: {e}"
+    return info

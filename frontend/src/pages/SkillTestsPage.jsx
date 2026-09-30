@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ClipboardCheck, BadgeCheck, Clock, ListChecks, ExternalLink, Search, TrendingUp, Users } from 'lucide-react'
 import { skillTestsApi } from '../utils/api'
-import { SKILL_TESTS, PASS_SCORE, pickText, encodeInviteToken, inviteUrl } from '../utils/skillsEngine'
+import { SKILL_TESTS, PASS_SCORE, pickText, encodeInviteToken } from '../utils/skillsEngine'
 
 function Stat({ icon: Icon, label, value, color = 'text-primary-700' }) {
   return (
@@ -24,6 +24,7 @@ function Stat({ icon: Icon, label, value, color = 'text-primary-700' }) {
  */
 export default function SkillTestsPage() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const lang = i18n.language
   const [resultats, setResultats] = useState([])
   const [loading, setLoading] = useState(true)
@@ -50,7 +51,7 @@ export default function SkillTestsPage() {
   const perProva = resultats.reduce((acc, r) => { acc[r.test_id] = (acc[r.test_id] || 0) + (r.passed ? 1 : 0); return acc }, {})
 
   const previsualitzar = (testId) => {
-    window.open(inviteUrl(encodeInviteToken({ candidateId: null, testId })), '_blank', 'noopener')
+    navigate(`/prova/${encodeInviteToken({ candidateId: null, testId })}`, { state: { preview: true } })
   }
 
   return (

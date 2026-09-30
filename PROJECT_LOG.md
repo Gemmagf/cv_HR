@@ -23,11 +23,14 @@ Darrera actualització: 2026-09-30
 - [x] Comparació insensible a accents i majúscules; nivells CEFR; remot/presencial/híbrid
 - [x] Corregit `cand.teletreball or True` (ignorava el `False` del candidat)
 
-### Parser de CV amb Claude
-- [x] Client **asíncron** (`AsyncAnthropic`), model per defecte `claude-opus-5-5` (configurable amb `CLAUDE_MODEL`)
-- [x] **Sortida estructurada** amb JSON Schema (`output_config.format`): JSON sempre vàlid
-- [x] Prompt caching del system prompt; fallback de seguretat (`fallbacks="default"`); `stop_reason=refusal` → HTTP 422
-- [x] SHA-256 per deduplicació; endpoints `/candidates/upload` i `/upload-massiu` retornen les proves recomanades
+### IA: parser de CV amb models locals (o Claude)
+- [x] **Capa de proveïdor** `app/services/llm.py`: `LLM_PROVIDER=ollama` (per defecte) o `anthropic`
+- [x] **Ollama**: crida a `/api/chat` amb `format=<JSON Schema>` → JSON sempre vàlid; model per defecte `qwen2.5:7b`; missatge útil si el model no està descarregat
+- [x] Servei `ollama` + `ollama-pull` al `docker-compose.yml`; el frontend de compose arrenca en mode real (`VITE_DEMO=false`)
+- [x] `/health` informa del proveïdor, el model i si està carregat
+- [x] Anthropic opcional: `AsyncAnthropic`, `claude-opus-5-5`, sortida estructurada, fallback de seguretat
+- [x] Normalització defensiva de la resposta (models petits ometen camps); SHA-256 per deduplicació
+- [x] Tests del proveïdor amb un Ollama simulat (`tests/test_llm_ollama.py`)
 
 ### 🆕 Mini-proves d'habilitats (Skill Checks) — Mòdul F
 - [x] **Catàleg** d'11 proves (5 preguntes, 6-10 min, ca+en): Excel, SQL, Python, Power BI, SAP HCM, Workday, LinkedIn Recruiter, Anglès B2, Nòmines, Compres, Selecció per competències. Font única `frontend/src/data/skillTests.json` (còpia a `backend/app/data/`, test de sincronització)
@@ -67,8 +70,9 @@ Darrera actualització: 2026-09-30
 | Preguntes tipus test de 5 ítems, llindar 60% | Prou curt perquè el candidat ho faci de seguida; discrimina sense substituir una entrevista tècnica profunda |
 | Enllaç públic amb token (sense compte de candidat) | Fricció mínima; en mode real el token és aleatori i caduca (14 dies per defecte) |
 | Verificada 100% / declarada 85% al matching | Premia acreditar sense penalitzar en excés qui encara no ha fet la prova |
-| `claude-opus-5-5` + sortida estructurada | Model actual per defecte; el JSON Schema elimina el parsing fràgil de blocs ```json |
-| `AsyncAnthropic` | Les crides síncrones bloquejaven l'event loop de FastAPI durant tot el parsing |
+| **Models locals per defecte (Ollama)** | Cap clau ni cost per fer la demo; els CVs (dades personals) no surten de la màquina; el proveïdor és intercanviable |
+| `qwen2.5:7b` com a model per defecte | Bona sortida JSON i comprensió de català/castellà; `qwen2.5:3b` com a alternativa sense GPU |
+| Sortida restringida a JSON Schema (Ollama `format`, Anthropic `output_config`) | Elimina el parsing fràgil de blocs ```json en tots dos proveïdors |
 | `DEMO` per variable d'entorn | Permet desplegar el mateix codi a GitHub Pages (demo) i contra un backend real sense tocar-lo |
 | Claus i18n del mòdul en fitxers a part | Els locales base es mantenen llegibles; `deepMerge` les incorpora en temps de càrrega |
 | HashRouter + `base: './'` | GitHub Pages no redirigeix SPAs |
@@ -79,7 +83,9 @@ Darrera actualització: 2026-09-30
 
 ### Alta prioritat
 - [ ] **Migracions amb Alembic** (ara `create_all`): els camps nous `habilitats_verificades`, `proves_requerides` i la taula `skill_test_attempts` necessiten migració en bases existents
-- [ ] **Desplegar backend** (Railway / Render / Fly.io) i posar `VITE_DEMO=false` + `VITE_API_URL` al workflow de Pages
+- [ ] **Desplegar backend** amb Ollama (VPS amb GPU, o CPU amb `qwen2.5:3b`) i posar `VITE_DEMO=false` + `VITE_API_URL` al workflow de Pages
+- [ ] **Explicació del matching amb l'LLM local**: per candidat, raonament de 2 línies, riscos i preguntes d'entrevista (el motor numèric filtra, el model explica)
+- [ ] **Proves generades a mida per posició** amb el model local, en lloc del catàleg fix
 - [ ] **Enviament d'invitacions per correu** (ara es copia l'enllaç al porta-retalls): plantilla + proveïdor SMTP/Resend
 - [ ] **Anti-frau bàsic** a les proves: barrejar l'ordre de preguntes/opcions per intent, limitar reintents, registrar temps per pregunta
 

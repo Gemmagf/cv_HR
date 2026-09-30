@@ -49,7 +49,7 @@ export default {
       rules2: 'Sobald Sie beginnen, läuft die Zeit. Sie können Antworten vor dem Absenden ändern.',
       start: 'Test starten', next: 'Weiter', prev: 'Zurück', submit: 'Antworten absenden', submitting: 'Auswertung...',
       question: 'Frage {{i}} von {{n}}', timeUp: 'Die Zeit ist abgelaufen',
-      unanswered: '{{n}} unbeantwortete Frage(n). Trotzdem absenden?',
+      unanswered: '{{n}} unbeantwortete Frage(n). Klicken Sie erneut auf Absenden, um zu bestätigen.',
       resultPassed: 'Glückwunsch! Sie haben bestanden', resultFailed: 'Diesmal nicht bestanden',
       score: '{{c}} von {{t}} richtigen Antworten', level: 'Niveau',
       passedMsg: 'Ihre Kompetenz in {{skill}} ist jetzt in Ihrem Profil verifiziert. Unternehmen werden Ihnen für diesen Skill keinen Fachtest mehr stellen.',

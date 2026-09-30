@@ -49,7 +49,7 @@ export default {
       rules2: 'Po rozpoczęciu czas biegnie. Możesz zmienić odpowiedź przed wysłaniem.',
       start: 'Rozpocznij test', next: 'Dalej', prev: 'Wstecz', submit: 'Wyślij odpowiedzi', submitting: 'Sprawdzanie...',
       question: 'Pytanie {{i}} z {{n}}', timeUp: 'Czas minął',
-      unanswered: '{{n}} pytań bez odpowiedzi. Wysłać mimo to?',
+      unanswered: '{{n}} pytań bez odpowiedzi. Kliknij Wyślij ponownie, aby potwierdzić.',
       resultPassed: 'Gratulacje! Test zaliczony', resultFailed: 'Tym razem test niezaliczony',
       score: '{{c}} z {{t}} poprawnych odpowiedzi', level: 'Poziom',
       passedMsg: 'Twoja umiejętność {{skill}} jest teraz zweryfikowana w profilu. Firmy nie będą już przeprowadzać testu technicznego z tej umiejętności.',

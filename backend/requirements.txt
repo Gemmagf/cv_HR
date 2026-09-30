@@ -19,7 +19,8 @@ passlib[bcrypt]==1.7.4
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
 
-# IA — Anthropic Claude
+# IA — proveïdor per defecte: Ollama (models locals) via httpx (ja inclòs a Utilitats)
+# Anthropic només cal si LLM_PROVIDER=anthropic
 anthropic>=1.9,<2
 
 # Processament de documents

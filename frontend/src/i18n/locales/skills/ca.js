@@ -50,7 +50,7 @@ export default {
       rules2: 'Un cop comences, el temps corre. Pots canviar de resposta abans d\'enviar.',
       start: 'Començar la prova', next: 'Següent', prev: 'Anterior', submit: 'Enviar respostes', submitting: 'Corregint...',
       question: 'Pregunta {{i}} de {{n}}', timeUp: 'S\'ha acabat el temps',
-      unanswered: '{{n}} pregunta/es sense resposta. Vols enviar igualment?',
+      unanswered: '{{n}} pregunta/es sense resposta. Torna a clicar «Enviar» per confirmar.',
       resultPassed: 'Enhorabona! Has superat la prova', resultFailed: 'No has superat la prova',
       score: '{{c}} de {{t}} respostes correctes', level: 'Nivell',
       passedMsg: 'La teva habilitat en {{skill}} queda verificada al teu perfil. Les empreses ja no et faran una prova tècnica d\'aquesta habilitat.',

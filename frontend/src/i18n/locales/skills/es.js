@@ -49,7 +49,7 @@ export default {
       rules2: 'Una vez empieces, el tiempo corre. Puedes cambiar de respuesta antes de enviar.',
       start: 'Empezar la prueba', next: 'Siguiente', prev: 'Anterior', submit: 'Enviar respuestas', submitting: 'Corrigiendo...',
       question: 'Pregunta {{i}} de {{n}}', timeUp: 'Se ha acabado el tiempo',
-      unanswered: '{{n}} pregunta(s) sin respuesta. ¿Quieres enviar igualmente?',
+      unanswered: '{{n}} pregunta(s) sin respuesta. Vuelve a pulsar «Enviar» para confirmar.',
       resultPassed: '¡Enhorabuena! Has superado la prueba', resultFailed: 'No has superado la prueba',
       score: '{{c}} de {{t}} respuestas correctas', level: 'Nivel',
       passedMsg: 'Tu habilidad en {{skill}} queda verificada en tu perfil. Las empresas ya no te harán una prueba técnica de esta habilidad.',

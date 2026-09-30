@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BadgeCheck, Clock, ListChecks, ChevronLeft, ChevronRight, CheckCircle2, XCircle, Loader2, ShieldCheck } from 'lucide-react'
 import { skillTestsApi } from '../utils/api'
@@ -12,6 +12,8 @@ import LanguageSwitcher from '../components/ui/LanguageSwitcher'
  */
 export default function PublicTestPage() {
   const { token } = useParams()
+  const { state } = useLocation()
+  const esPreview = !!state?.preview
   const { t, i18n } = useTranslation()
   const lang = i18n.language
 
@@ -23,6 +25,7 @@ export default function PublicTestPage() {
   const [segons, setSegons] = useState(0)
   const [enviant, setEnviant] = useState(false)
   const [resultat, setResultat] = useState(null)
+  const [confirmarEnviament, setConfirmar] = useState(false)
   const timerRef = useRef(null)
 
   useEffect(() => {
@@ -42,7 +45,7 @@ export default function PublicTestPage() {
 
   const enviar = async (force = false) => {
     if (enviant) return
-    if (!force && senseResposta > 0 && !window.confirm(t('skills.public.unanswered', { n: senseResposta }))) return
+    if (!force && senseResposta > 0 && !confirmarEnviament) { setConfirmar(true); return }
     clearInterval(timerRef.current)
     setEnviant(true)
     try {
@@ -92,6 +95,9 @@ export default function PublicTestPage() {
       </div>
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-6 sm:p-8 mt-2">{children}</div>
       <p className="text-primary-300 text-xs mt-6 flex items-center gap-1"><ShieldCheck size={12} /> {t('skills.public.poweredBy')}</p>
+      {esPreview && (
+        <Link to="/proves" className="text-accent-400 hover:text-white text-sm mt-2 underline">{t('skills.public.backToApp')}</Link>
+      )}
     </div>
   )
 
@@ -193,6 +199,9 @@ export default function PublicTestPage() {
             </button>
           )}
         </div>
+        {confirmarEnviament && senseResposta > 0 && (
+          <p className="text-xs text-orange-600 text-right mt-2">{t('skills.public.unanswered', { n: senseResposta })}</p>
+        )}
         <div className="flex justify-center gap-1.5 mt-5">
           {respostes.map((r, i) => (
             <button key={i} onClick={() => setIdx(i)} aria-label={`${i + 1}`}

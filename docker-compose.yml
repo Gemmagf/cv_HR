@@ -29,6 +29,34 @@ services:
       timeout: 5s
       retries: 3
 
+  # Models locals (LLM) — cap clau d'API, les dades no surten de la màquina
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cvhunter_ollama
+    volumes:
+      - cvhunter_ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+    # Amb GPU NVIDIA descomenta:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # Descarrega el model la primera vegada (idempotent) i acaba
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: cvhunter_ollama_pull
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${OLLAMA_MODEL:-qwen2.5:7b}"]
+    restart: "no"
+
   # Backend FastAPI
   backend:
     build:
@@ -39,6 +67,10 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://cvhunter:cvhunter@db:5432/cvhunter
       REDIS_URL: redis://redis:6379/0
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      PUBLIC_APP_URL: http://localhost:5173
     ports:
       - "8000:8000"
     depends_on:
@@ -46,16 +78,20 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ollama:
+        condition: service_started
     volumes:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Frontend Vite React
+  # Frontend Vite React (mode real: parla amb el backend via proxy /api)
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: cvhunter_frontend
+    environment:
+      VITE_DEMO: "false"
     ports:
       - "5173:5173"
     depends_on:
@@ -67,3 +103,4 @@ services:
 
 volumes:
   cvhunter_db_data:
+  cvhunter_ollama_models:

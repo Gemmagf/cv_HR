@@ -1,37 +1,32 @@
 """
-Mòdul A — Servei de Parsing de CV amb Claude (Anthropic)
+Mòdul A — Servei de Parsing de CV amb LLM
 Extreu i normalitza camps estructurats de qualsevol CV (PDF, Word, text pla)
 
-Notes d'implementació:
-  * Client asíncron (`AsyncAnthropic`): el parsing es fa dins d'endpoints async de FastAPI
-    i el client síncron bloquejava l'event loop durant tota la crida.
-  * Sortida estructurada (`output_config.format` amb JSON Schema): l'API garanteix JSON vàlid,
-    així no cal netejar blocs ```json ni fer fallback per errors de format.
-  * Prompt caching del system prompt (idèntic a cada crida) per abaratir càrregues massives.
-  * Fallback de seguretat activat (`fallbacks="default"`): si els classificadors declinen la
-    petició, l'API la reintenta amb un altre model dins la mateixa crida.
+El model s'executa via `app.services.llm` (models locals amb Ollama per defecte,
+o Claude si LLM_PROVIDER=anthropic). La sortida es restringeix a un JSON Schema,
+així el resultat sempre és JSON vàlid amb els camps esperats.
 """
 
 import hashlib
-import json
 from typing import Optional
 
-import anthropic
-
-from app.core.config import settings
-
-client_ai = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY or None)
+from app.services import llm
 
 PROMPT_EXTRACTOR = """Ets un sistema expert en anàlisi de CVs. Analitza el text del CV proporcionat i extreu la informació de forma estructurada seguint exactament l'esquema JSON indicat.
 
 INSTRUCCIONS:
-- anys_exp_total: calcula'l sumant totes les experiències professionals (sense solapaments)
-- anys_ultima_posicio: calcula'l des de data_inici_ultima fins avui (o fins data_fi_ultima)
-- Si no trobes una dada, posa null
+- Copia només dades que apareguin al CV. Si una dada no hi és, posa null (o una llista buida). No inventis res.
+- anys_exp_total: suma els anys de totes les experiències professionals (sense solapaments)
+- data_fi_ultima: null si la persona encara hi treballa ("actualitat", "present", "actual")
+- anys_ultima_posicio: anys des de data_inici_ultima fins avui (o fins data_fi_ultima)
+- titulacio_max: la titulació acadèmica més alta (p. ex. "Grau en Estadística"), MAI un càrrec professional
+- centre_estudis: només el nom de la universitat o centre d'aquesta titulació
+- sector: sector econòmic de l'última empresa (p. ex. "Farmacèutic", "Retail"); area_funcional: departament (p. ex. "RRHH")
 - habilitats_tecniques: eines, programes, tecnologies, metodologies (una entrada per habilitat, sense nivells)
-- habilitats_soft: competències interpersonals detectades al text
+- habilitats_soft: competències interpersonals que el CV esmenti explícitament; si no n'esmenta cap, []
+- formacions: una entrada per cada titulació o curs (tipus: universitaria per graus/màsters/postgraus)
 - Normalitza els nivells d'idioma a l'escala A1-C2 (Natiu si correspon)
-- El resum_ia ha de ser en català o castellà (el mateix idioma del CV), de 3-4 línies
+- resum_ia: 3-4 línies en l'idioma del CV, escrites per tu, resumint perfil, experiència i punts forts
 """
 
 _NULLABLE_STR = {"type": ["string", "null"]}
@@ -135,45 +130,29 @@ def compute_hash(text: str) -> str:
 
 
 class CVParseError(RuntimeError):
-    """El model no ha pogut extreure el CV (p. ex. petició declinada)."""
+    """El model no ha pogut extreure el CV (proveïdor inaccessible, model absent, petició declinada)."""
+
+
+def _normalitza(data: dict) -> dict:
+    """Els models locals de vegades ometen camps o retornen None on cal una llista."""
+    out = dict(DADES_FALLBACK)
+    out.update({k: v for k, v in data.items() if v is not None or k not in DADES_FALLBACK})
+    for camp in ("habilitats_tecniques", "habilitats_soft", "idiomes", "formacions", "experiencies"):
+        if not isinstance(out.get(camp), list):
+            out[camp] = []
+    if not out.get("nom"):
+        out["nom"] = DADES_FALLBACK["nom"]
+    return out
 
 
 async def parse_cv_text(cv_text: str) -> dict:
-    """
-    Analitza el text d'un CV amb Claude i retorna les dades estructurades.
-    Usa prompt caching per optimitzar costos en processaments massius.
-    """
-    response = await client_ai.beta.messages.create(
-        model=settings.CLAUDE_MODEL,
-        max_tokens=8192,  # el JSON d'un CV ocupa ~1-3K tokens; marge ampli sense arribar al timeout
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        system=[
-            {
-                "type": "text",
-                "text": PROMPT_EXTRACTOR,
-                "cache_control": {"type": "ephemeral"},  # Cache del system prompt
-            }
-        ],
-        messages=[
-            {
-                "role": "user",
-                "content": f"CV a analitzar:\n\n{cv_text}",
-            }
-        ],
-        output_config={"format": {"type": "json_schema", "schema": CV_SCHEMA}},
-    )
-
-    if response.stop_reason == "refusal":
-        raise CVParseError("El model ha declinat processar aquest document")
-
-    raw = next((b.text for b in response.content if b.type == "text"), "")
+    """Analitza el text d'un CV amb l'LLM configurat i retorna les dades estructurades."""
     try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        # Amb sortida estructurada no hauria de passar (p. ex. resposta tallada per max_tokens)
-        data = dict(DADES_FALLBACK)
+        data = await llm.generate_json(PROMPT_EXTRACTOR, f"CV a analitzar:\n\n{cv_text}", CV_SCHEMA)
+    except llm.LLMError as e:
+        raise CVParseError(str(e)) from e
 
+    data = _normalitza(data)
     data["cv_text_raw"] = cv_text
     data["hash_cv"] = compute_hash(cv_text)
     return data
